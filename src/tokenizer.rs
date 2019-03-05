@@ -468,7 +468,24 @@ mod scan {
             imprima("oi")
         "#;
         let tokens = scan(source);
-        println!("{:?}", tokens);
+        assert_eq!(7, tokens.len());
+        assert_eq!(Token::Se, tokens[0]);
+        assert_eq!(Token::Logico(true), tokens[1]);
+        assert_eq!(Token::Colon, tokens[2]);
+        assert_eq!(Token::Imprima, tokens[3]);
+        assert_eq!(Token::ParentOpen, tokens[4]);
+        assert_eq!(Token::Texto("oi".into()), tokens[5]);
+        assert_eq!(Token::ParentClose, tokens[6]);
+    }
+
+    #[test]
+    fn test_scan_code_with_more_lines_should_ignore_comments() {
+        let source = r#"
+        se Verdadeiro: # Devo ignorar este comentario
+            imprima("oi")
+        "#;
+        let tokens = scan(source);
+        assert_eq!(7, tokens.len());
         assert_eq!(Token::Se, tokens[0]);
         assert_eq!(Token::Logico(true), tokens[1]);
         assert_eq!(Token::Colon, tokens[2]);
