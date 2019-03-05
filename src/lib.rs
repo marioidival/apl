@@ -28,6 +28,8 @@ pub enum Token {
     Classe,
     // print
     Imprima,
+    // input
+    Entrada,
     // if
     Se,
     // else
@@ -38,7 +40,7 @@ pub enum Token {
     // or
     Ou,
     // not
-    Negue,
+    Nao,
     // True
     Verdadeiro,
     // False
@@ -50,7 +52,7 @@ pub enum Token {
     // assert
     Verifique,
     // break
-    Interromper,
+    Interrompa,
     // return
     Retorne,
     // None,
@@ -66,7 +68,7 @@ pub enum Token {
     // try
     Tente,
     // except
-    Fudeu,
+    Exceto,
     // pass
     Passe,
 
@@ -221,6 +223,7 @@ impl<'a> Tokenizer<'a> {
             '"' => self.consume_string(),
             c if c.is_numeric() => self.consume_numbers(),
             c if c.is_whitespace() => Some(Token::WhiteSpace),
+            c if c.is_alphabetic() => self.consumer_identifier(),
             _ => Some(Token::EOF),
         }
     }
@@ -256,6 +259,43 @@ impl<'a> Tokenizer<'a> {
         let literal: String = self.current_lexeme.chars().skip(1).collect();
 
         Some(Token::Texto(literal))
+    }
+
+    fn consumer_identifier(&mut self) -> Option<Token> {
+        let is_alpha = |c: char| c.is_alphanumeric();
+        self.advance_while(&is_alpha);
+
+        match self.current_lexeme.as_ref() {
+            "Verdadeiro" => Some(Token::Logico(true)),
+            "Falso" => Some(Token::Logico(false)),
+            "Vazio" => Some(Token::Vazio),
+            "classe" => Some(Token::Classe),
+            "fun" => Some(Token::Fun),
+            "lista" => Some(Token::Lista),
+            "dicionario" => Some(Token::Dicionario),
+            "tupla" => Some(Token::Tupla),
+            "conjunto" => Some(Token::Conjunto),
+            "imprima" => Some(Token::Imprima),
+            "entrada" => Some(Token::Entrada),
+            "se" => Some(Token::Se),
+            "senao" => Some(Token::SeNao),
+            "e" => Some(Token::E),
+            "ou" => Some(Token::Ou),
+            "nao" => Some(Token::Nao),
+            "remova" => Some(Token::Remova),
+            "interrompa" => Some(Token::Interrompa),
+            "retorne" => Some(Token::Retorne),
+            "continue" => Some(Token::Continue),
+            "paracada" => Some(Token::ParaCada),
+            "enquanto" => Some(Token::Enquanto),
+            "verifique" => Some(Token::Verifique),
+            "passe" => Some(Token::Passe),
+            "tente" => Some(Token::Tente),
+            "exceto" => Some(Token::Exceto),
+            "global" => Some(Token::Global),
+            "em" => Some(Token::Em),
+            _ => Some(Token::EOF)
+        }
     }
 }
 
@@ -328,6 +368,126 @@ mod tests {
 //        FIXME: I can have .199 float values
 //        let mut tokenizer = Tokenizer::init(".199");
 //        assert_eq!(Some(Token::Real(0.199)), tokenizer.scan_next())
+    }
+
+    #[test]
+    fn test_scan_next_keywords_type_bool_identifiers() {
+        let mut tokenizer = Tokenizer::init("Verdadeiro");
+        assert_eq!(Some(Token::Logico(true)), tokenizer.scan_next());
+
+        let mut tokenizer = Tokenizer::init("Falso");
+        assert_eq!(Some(Token::Logico(false)), tokenizer.scan_next())
+    }
+
+    #[test]
+    fn test_scan_next_keywords_class_def_identifier() {
+        let mut tokenizer = Tokenizer::init("fun");
+        assert_eq!(Some(Token::Fun), tokenizer.scan_next());
+
+        let mut tokenizer = Tokenizer::init("classe");
+        assert_eq!(Some(Token::Classe), tokenizer.scan_next())
+    }
+
+    #[test]
+    fn test_scan_next_keywords_type_identifier() {
+        let mut tokenizer = Tokenizer::init("lista");
+        assert_eq!(Some(Token::Lista), tokenizer.scan_next());
+
+        let mut tokenizer = Tokenizer::init("conjunto");
+        assert_eq!(Some(Token::Conjunto), tokenizer.scan_next());
+
+        let mut tokenizer = Tokenizer::init("tupla");
+        assert_eq!(Some(Token::Tupla), tokenizer.scan_next());
+
+        let mut tokenizer = Tokenizer::init("dicionario");
+        assert_eq!(Some(Token::Dicionario), tokenizer.scan_next())
+    }
+
+    #[test]
+    fn test_scan_next_keywords_input_print_identifier() {
+        let mut tokenizer = Tokenizer::init("imprima");
+        assert_eq!(Some(Token::Imprima), tokenizer.scan_next());
+
+        let mut tokenizer = Tokenizer::init("entrada");
+        assert_eq!(Some(Token::Entrada), tokenizer.scan_next())
+    }
+
+    #[test]
+    fn test_scan_next_keywords_if_else_identifier() {
+        let mut tokenizer = Tokenizer::init("se");
+        assert_eq!(Some(Token::Se), tokenizer.scan_next());
+
+        let mut tokenizer = Tokenizer::init("senao");
+        assert_eq!(Some(Token::SeNao), tokenizer.scan_next())
+    }
+
+    #[test]
+    fn test_scan_next_keywords_logic_operators_identifier() {
+        let mut tokenizer = Tokenizer::init("e");
+        assert_eq!(Some(Token::E), tokenizer.scan_next());
+
+        let mut tokenizer = Tokenizer::init("ou");
+        assert_eq!(Some(Token::Ou), tokenizer.scan_next());
+
+        let mut tokenizer = Tokenizer::init("nao");
+        assert_eq!(Some(Token::Nao), tokenizer.scan_next());
+    }
+
+    #[test]
+    fn test_scan_next_keywords_break_continue_and_return_identifier() {
+        let mut tokenizer = Tokenizer::init("interrompa");
+        assert_eq!(Some(Token::Interrompa), tokenizer.scan_next());
+
+        let mut tokenizer = Tokenizer::init("continue");
+        assert_eq!(Some(Token::Continue), tokenizer.scan_next());
+
+        let mut tokenizer = Tokenizer::init("retorne");
+        assert_eq!(Some(Token::Retorne), tokenizer.scan_next())
+    }
+
+    #[test]
+    fn test_scan_next_keywords_del_and_in_identifier() {
+        let mut tokenizer = Tokenizer::init("remova");
+        assert_eq!(Some(Token::Remova), tokenizer.scan_next());
+
+        let mut tokenizer = Tokenizer::init("em");
+        assert_eq!(Some(Token::Em), tokenizer.scan_next())
+    }
+
+    #[test]
+    fn test_scan_next_keywords_for_while_and_continue_identifier() {
+        let mut tokenizer = Tokenizer::init("paracada");
+        assert_eq!(Some(Token::ParaCada), tokenizer.scan_next());
+
+        let mut tokenizer = Tokenizer::init("continue");
+        assert_eq!(Some(Token::Continue), tokenizer.scan_next());
+
+        let mut tokenizer = Tokenizer::init("enquanto");
+        assert_eq!(Some(Token::Enquanto), tokenizer.scan_next())
+    }
+
+    #[test]
+    fn test_scan_next_keywords_pass_assert_identifier() {
+        let mut tokenizer = Tokenizer::init("passe");
+        assert_eq!(Some(Token::Passe), tokenizer.scan_next());
+
+        let mut tokenizer = Tokenizer::init("verifique");
+        assert_eq!(Some(Token::Verifique), tokenizer.scan_next())
+    }
+
+    #[test]
+    fn test_scan_next_keywords_try_except_identifier() {
+        let mut tokenizer = Tokenizer::init("tente");
+        assert_eq!(Some(Token::Tente), tokenizer.scan_next());
+
+        let mut tokenizer = Tokenizer::init("exceto");
+        assert_eq!(Some(Token::Exceto), tokenizer.scan_next())
+    }
+
+    #[test]
+    fn test_scan_next_keywords_global_identifier() {
+        let mut tokenizer = Tokenizer::init("global");
+        assert_eq!(Some(Token::Global), tokenizer.scan_next())
     }
 
     #[test]

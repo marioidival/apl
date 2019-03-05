@@ -16,40 +16,40 @@ um nome (não uma letra mas um grupo deles) ou um símbolo (como as operações 
 É o processo de reconhecer uma frase no fluxo (stream) de tokens.
 
 
-|Python| APL |
-|-----|-----|
-|def|fun|
-|class|classe|
-|int|inteiro|
-|float|real(?)|
-|str|texto|
-|bool|logico|
-|list|lista|
-|tuple|tupla|
-|dict|dicionario|
-|set|conjunto|
-|print|saida(?) imprima(?) escreva(?)|
-|input|entrada(?) leia(?)|
-|if|se|
-|else|senao|
+|Python| APL |Done|
+|-----|-----|-----|
+|def|fun|X|
+|class|classe|X|
+|int|inteiro|X|
+|float|real|X|
+|str|texto|X|
+|bool|logico|X|
+|list|lista|X|
+|tuple|tupla|X|
+|dict|dicionario|X|
+|set|conjunto|X|
+|print|imprima|X|
+|input|entrada|X|
+|if|se|X|
+|else|senao|X|
 |elif|???|
-|and|e|
-|or|ou|
-|not|nao(?) negue(?)|
-|True|Verdadeiro|
-|False|Falso
-|del|remova|
-|in|em|
-|break|parar(?) interromper(?)|
-|return|retorne|
-|None|Vazio(?) Nada(?)|
-|continue|continue|
-|for| para(?) emcada(?) acada(?) paracada(!) "X item em items"?|
-|while|enquanto|
-|global|global|
-|try|tente|
-|except|?|
-|pass|passe|
-|assert|verifique|
+|and|e|X|
+|or|ou|X|
+|not|nao|X|
+|True|Verdadeiro|X|
+|False|Falso|X|
+|del|remova|X|
+|in|em|X|
+|break|interrompa|X|
+|return|retorne|X|
+|None|Vazio|X|
+|continue|continue|X|
+|for| paracada|X|
+|while|enquanto|X|
+|global|global|X|
+|try|tente|X|
+|except|exceto|X|
+|pass|passe|X|
+|assert|verifique|X|
 
 ```
