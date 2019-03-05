@@ -98,8 +98,8 @@ pub enum Token {
 
     // composite symbols
     EqualEqual,
-    GreaterEqual,
-    LessEqual,
+    GreaterThan,
+    LessThan,
     BangEqual,
 
     // etc
@@ -200,14 +200,14 @@ impl<'a> Tokenizer<'a> {
             '.' => Some(Token::Dot),
             '>' => {
                 if self.advance_if_match('=') {
-                    Some(Token::GreaterEqual)
+                    Some(Token::GreaterThan)
                 } else {
                     Some(Token::Greater)
                 }
             }
             '<' => {
                 if self.advance_if_match('=') {
-                    Some(Token::LessEqual)
+                    Some(Token::LessThan)
                 } else {
                     Some(Token::Less)
                 }
@@ -304,9 +304,9 @@ mod tests {
         let mut tokenizer = Tokenizer::init("!=>===<=");
 
         assert_eq!(Some(Token::BangEqual), tokenizer.scan_next());
-        assert_eq!(Some(Token::GreaterEqual), tokenizer.scan_next());
+        assert_eq!(Some(Token::GreaterThan), tokenizer.scan_next());
         assert_eq!(Some(Token::EqualEqual), tokenizer.scan_next());
-        assert_eq!(Some(Token::LessEqual), tokenizer.scan_next());
+        assert_eq!(Some(Token::LessThan), tokenizer.scan_next());
     }
 
     #[test]
