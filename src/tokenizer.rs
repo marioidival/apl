@@ -65,6 +65,8 @@ impl<'a> Tokenizer<'a> {
     }
 
     pub fn scan_next(&mut self) -> Option<Token> {
+        self.current_lexeme.clear();
+
         let curr_char = match self.advance() {
             Some(c) => c,
             None => return None,
@@ -154,7 +156,8 @@ impl<'a> Tokenizer<'a> {
     fn consume_string(&mut self) -> Option<Token> {
         self.advance_while(&|c| c != '"' && c != '\n');
         let literal: String = self.current_lexeme.chars().skip(1).collect();
-
+        // consume last '"' from string
+        self.advance();
         Some(Token::Texto(literal))
     }
 
@@ -195,6 +198,38 @@ impl<'a> Tokenizer<'a> {
             identifier => Some(Token::Identifier(identifier.into()))
         }
     }
+}
+
+
+pub struct TokenizerIterator<'a> {
+    tokenizer: Tokenizer<'a>,
+}
+
+impl<'a> Iterator for TokenizerIterator<'a> {
+    type Item = Token;
+
+    fn next(&mut self) -> Option<Token> {
+        self.tokenizer.scan_next()
+    }
+}
+
+fn tokenizer_into_iterator<'a>(source: &'a str) -> impl Iterator<Item=Token> + 'a {
+    TokenizerIterator {
+        tokenizer: Tokenizer::init(source),
+    }
+}
+
+fn scan(source: &str) -> Vec<Token> {
+    let mut tokens = Vec::new();
+
+    for token in tokenizer_into_iterator(source) {
+        match token {
+            Token::WhiteSpace | Token::Comment => {},
+            _ => tokens.push(token)
+        }
+    }
+
+    tokens
 }
 
 mod tests {
@@ -273,6 +308,17 @@ mod tests {
 //        FIXME: I can have .199 float values
 //        let mut tokenizer = Tokenizer::init(".199");
 //        assert_eq!(Some(Token::Real(0.199)), tokenizer.scan_next())
+    }
+
+    #[test]
+    fn test_scan_next_spaces() {
+        let source = r#":
+        "#;
+        let mut tokenizer = Tokenizer::init(source);
+        assert_eq!(Some(Token::Colon), tokenizer.scan_next());
+        assert_eq!(Some(Token::WhiteSpace), tokenizer.scan_next());
+        assert_eq!(Some(Token::WhiteSpace), tokenizer.scan_next());
+        assert_eq!(Some(Token::WhiteSpace), tokenizer.scan_next());
     }
 
     #[test]
@@ -399,5 +445,36 @@ mod tests {
     fn test_scan_next_variable_identifier() {
         let mut tokenizer = Tokenizer::init("num = 0");
         assert_eq!(Some(Token::Identifier("num".into())), tokenizer.scan_next())
+    }
+}
+
+mod scan {
+    use super::*;
+
+    #[test]
+    fn test_scan() {
+        let source = "se Verdadeiro:";
+        let tokens = scan(source);
+
+        assert_eq!(3, tokens.len());
+        assert_eq!(Token::Se, tokens[0]);
+        assert_eq!(Token::Logico(true), tokens[1]);
+        assert_eq!(Token::Colon, tokens[2]);
+    }
+
+    #[test]
+    fn test_scan_code_with_more_lines() {
+        let source = r#"se Verdadeiro:
+            imprima("oi")
+        "#;
+        let tokens = scan(source);
+        println!("{:?}", tokens);
+        assert_eq!(Token::Se, tokens[0]);
+        assert_eq!(Token::Logico(true), tokens[1]);
+        assert_eq!(Token::Colon, tokens[2]);
+        assert_eq!(Token::Imprima, tokens[3]);
+        assert_eq!(Token::ParentOpen, tokens[4]);
+        assert_eq!(Token::Texto("oi".into()), tokens[5]);
+        assert_eq!(Token::ParentClose, tokens[6]);
     }
 }
