@@ -32,7 +32,7 @@ um nome (não uma letra mas um grupo deles) ou um símbolo (como as operações 
 |input|entrada|X|
 |if|se|X|
 |else|senao|X|
-|elif|ouentaose|
+|elif|ouentaose|X|
 |and|e|X|
 |or|ou|X|
 |not|nao|X|

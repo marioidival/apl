@@ -83,7 +83,10 @@ impl<'a> Tokenizer<'a> {
                 }
             }
             '%' => Some(Token::Percent),
-            '#' => Some(Token::Comment),
+            '#' => {
+                self.advance_while(&|c| c != '\n');
+                Some(Token::Comment)
+            },
             '!' => {
                 if self.advance_if_match('=') {
                     Some(Token::BangEqual)
@@ -210,7 +213,7 @@ mod tests {
 
     #[test]
     fn test_scan_next_symbols_success() {
-        let mut tokenizer = Tokenizer::init(":+-*/()%.,![]{}><#= ");
+        let mut tokenizer = Tokenizer::init(":+-*/()%.,![]{}>< =");
 
         assert_eq!(Some(Token::Colon), tokenizer.scan_next());
         assert_eq!(Some(Token::Plus), tokenizer.scan_next());
@@ -229,9 +232,16 @@ mod tests {
         assert_eq!(Some(Token::BracketClose), tokenizer.scan_next());
         assert_eq!(Some(Token::Greater), tokenizer.scan_next());
         assert_eq!(Some(Token::Less), tokenizer.scan_next());
-        assert_eq!(Some(Token::Comment), tokenizer.scan_next());
-        assert_eq!(Some(Token::Equal), tokenizer.scan_next());
         assert_eq!(Some(Token::WhiteSpace), tokenizer.scan_next());
+        assert_eq!(Some(Token::Equal), tokenizer.scan_next());
+    }
+
+    #[test]
+    fn test_scan_next_comment_cases() {
+        let mut tokenizer = Tokenizer::init("# isto é um comentario");
+
+        assert_eq!(Some(Token::Comment), tokenizer.scan_next());
+        assert_eq!(None, tokenizer.scan_next())
     }
 
     #[test]
