@@ -294,7 +294,7 @@ impl<'a> Tokenizer<'a> {
             "exceto" => Some(Token::Exceto),
             "global" => Some(Token::Global),
             "em" => Some(Token::Em),
-            _ => Some(Token::EOF)
+            identifier => Some(Token::Identifier(identifier.into()))
         }
     }
 }
@@ -488,6 +488,12 @@ mod tests {
     fn test_scan_next_keywords_global_identifier() {
         let mut tokenizer = Tokenizer::init("global");
         assert_eq!(Some(Token::Global), tokenizer.scan_next())
+    }
+
+    #[test]
+    fn test_scan_next_variable_identifier() {
+        let mut tokenizer = Tokenizer::init("num = 0");
+        assert_eq!(Some(Token::Identifier("num".into())), tokenizer.scan_next())
     }
 
     #[test]
