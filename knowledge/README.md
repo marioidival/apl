@@ -51,5 +51,12 @@ um nome (não uma letra mas um grupo deles) ou um símbolo (como as operações 
 |except|exceto|X|
 |pass|passe|X|
 |assert|verifique|X|
+|raise|provoque|X|
+|as|como||
+|finally|finalmente||
+|lambda|lambda||
+|is|é||
 
-```
+
+## Gramatica
+

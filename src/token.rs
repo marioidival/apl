@@ -62,6 +62,8 @@ pub enum Token {
     Exceto,
     // pass
     Passe,
+    // raise
+    Provoque,
 
     // identifier == variables
     Identifier(String),

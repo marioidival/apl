@@ -156,8 +156,10 @@ impl<'a> Tokenizer<'a> {
     fn consume_string(&mut self) -> Option<Token> {
         self.advance_while(&|c| c != '"' && c != '\n');
         let literal: String = self.current_lexeme.chars().skip(1).collect();
-        // consume last '"' from string
-        self.advance();
+        // TODO: Return error!
+        if !self.advance_if_match('"') {
+            return None
+        }
         Some(Token::Texto(literal))
     }
 
@@ -193,6 +195,7 @@ impl<'a> Tokenizer<'a> {
             "passe" => Some(Token::Passe),
             "tente" => Some(Token::Tente),
             "exceto" => Some(Token::Exceto),
+            "provoque" => Some(Token::Provoque),
             "global" => Some(Token::Global),
             "em" => Some(Token::Em),
             identifier => Some(Token::Identifier(identifier.into()))
@@ -427,12 +430,15 @@ mod tests {
     }
 
     #[test]
-    fn test_scan_next_keywords_try_except_identifier() {
+    fn test_scan_next_keywords_try_except_raise_identifier() {
         let mut tokenizer = Tokenizer::init("tente");
         assert_eq!(Some(Token::Tente), tokenizer.scan_next());
 
         let mut tokenizer = Tokenizer::init("exceto");
-        assert_eq!(Some(Token::Exceto), tokenizer.scan_next())
+        assert_eq!(Some(Token::Exceto), tokenizer.scan_next());
+
+        let mut tokenizer = Tokenizer::init("provoque");
+        assert_eq!(Some(Token::Provoque), tokenizer.scan_next());
     }
 
     #[test]
