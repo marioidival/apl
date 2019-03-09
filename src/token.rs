@@ -1,4 +1,4 @@
-#[derive(Debug, PartialOrd, PartialEq)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Token {
     // int
     Inteiro(i64),

@@ -222,7 +222,7 @@ fn tokenizer_into_iterator<'a>(source: &'a str) -> impl Iterator<Item=Token> + '
     }
 }
 
-fn scan(source: &str) -> Vec<Token> {
+pub(crate) fn scan(source: &str) -> Vec<Token> {
     let mut tokens = Vec::new();
 
     for token in tokenizer_into_iterator(source) {
