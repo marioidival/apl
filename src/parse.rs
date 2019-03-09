@@ -1,9 +1,8 @@
 use crate::ast;
-use crate::tokenizer::scan;
+use crate::ast::{Comparisson, Expression, Number, Statement};
 use crate::token::Token;
+use crate::tokenizer::scan;
 use crate::tokens::Tokens;
-use crate::ast::{Statement, Expression};
-use crate::token::Token::ParentClose;
 
 #[derive(Debug)]
 pub enum ParseError {
@@ -42,12 +41,27 @@ impl Parser {
 
     fn statements(&mut self) -> Option<Result<Statement, ParseError>> {
         match self.current() {
-            // fun
-            // classe
-            // identifier
-            Some(Token::Identifier(value)) => match self.peek() {
+            Some(Token::Interrompa) => Some(Ok(ast::Statement::Break)),
+            Some(Token::Passe) => Some(Ok(ast::Statement::Pass)),
+            Some(Token::Retorne) => {
+                if let Some(expr) = self.expression() {
+                    Some(Ok(ast::Statement::Return { value: Some(vec![expr]) }))
+                } else {
+                    Some(Ok(ast::Statement::Return { value: Some(vec![]) }))
+                }
+            }
+            Some(Token::Verifique) => {
+                if let Some(expr) = self.expression() {
+                    Some(Ok(ast::Statement::Assert {
+                        test: expr,
+                        msg: None,
+                    }))
+                } else {
+                    None
+                }
+            }
+            Some(Token::Identifier(_)) => match self.peek() {
                 Some(Token::Equal) => {
-                    let _ = self.advance();
                     if let Some(assign) = self.parse_assignment() {
                         Some(Ok(assign))
                     } else {
@@ -56,28 +70,89 @@ impl Parser {
                 }
                 _ => None
             }
-            // imprima
             Some(Token::Imprima) => {
-                let _ = self.advance();
-                if let Some(expression) = self.parser_print() {
+                if let Some(expression) = self.parse_print() {
                     Some(Ok(ast::Statement::Expr { expression }))
                 } else {
                     Some(Err(ParseError::Message("could not get statements".into())))
                 }
             }
-            _ => None
+            _ => {
+                if let Some(expression) = self.expression() {
+                    Some(Ok(ast::Statement::Expr { expression }))
+                } else {
+                    None
+                }
+            }
         }
     }
 
-    fn expression(self) -> ast::Expression {
-        unimplemented!()
+    fn parse_assignment(&mut self) -> Option<ast::Statement> {
+        let identifier = match self.identifier() {
+            Ok(identifier) => identifier,
+            Err(o) => {
+                return None;
+            }
+        };
+
+        if !self.consume(&Token::Equal) {
+            return None;
+        }
+
+        Some(ast::Statement::Assign {
+            targets: vec![identifier],
+            value: self.expression().unwrap(),
+        })
     }
 
-    fn call(&self) {
-        unimplemented!()
+    fn expression(&mut self) -> Option<ast::Expression> {
+        let mut a = self.factor();
+        while let Some(token) = self.current() {
+            match token {
+                Token::Less | Token::LessThan | Token::Greater | Token::GreaterThan => {
+                    self.advance();
+                    a = Some(ast::Expression::Compare {
+                        a: Box::new(a.unwrap()),
+                        op: Comparisson::from(token),
+                        b: Box::new(self.factor().unwrap()),
+                    });
+                }
+                _ => {
+                    break
+                }
+            }
+        }
+        return a
     }
 
-    fn parser_print(&mut self) -> Option<ast::Expression> {
+    fn factor(&mut self) -> Option<ast::Expression> {
+        match self.current() {
+            Some(Token::Inteiro(value)) => {
+                let _ = self.advance();
+                Some(ast::Expression::Num {
+                    value: Number::Integer { value }
+                })
+            }
+            Some(Token::Real(value)) => {
+                let _ = self.advance();
+                Some(ast::Expression::Num {
+                    value: Number::Float { value }
+                })
+            }
+            Some(Token::Texto(value)) => {
+                let _ = self.advance();
+                Some(ast::Expression::Str { value })
+            }
+            _ => None,
+        }
+    }
+
+    fn parse_print(&mut self) -> Option<ast::Expression> {
+        let print_identifier = match self.identifier() {
+            Ok(print_identifier) => print_identifier,
+            Err(_) => return None,
+        };
+
         if !self.consume(&Token::ParentOpen) {
             return None;
         }
@@ -94,20 +169,24 @@ impl Parser {
         }
 
         Some(ast::Expression::Call {
-            function: Box::new(ast::Expression::Identifier { name: String::from("imprima") }),
-            args: args,
+            function: Box::new(print_identifier),
+            args,
             keywords: vec![],
         })
     }
 
-    fn parse_assignment(&mut self) -> Option<ast::Statement> {
-        // =
-        // value (expression)
-        unimplemented!()
-    }
-
-    fn identifier(&mut self) -> Option<ast::Expression> {
-        unimplemented!()
+    fn identifier(&mut self) -> Result<ast::Expression, ParseError> {
+        match self.current() {
+            Some(Token::Imprima) => {
+                let _ = self.advance();
+                Ok(ast::Expression::Identifier { name: String::from("imprima") })
+            }
+            Some(Token::Identifier(name)) => {
+                let _ = self.advance();
+                Ok(ast::Expression::Identifier { name: String::from(name) })
+            }
+            _ => Err(ParseError::Message("identifier not found".into())),
+        }
     }
 
     fn consume(&mut self, tok: &Token) -> bool {
@@ -147,9 +226,10 @@ pub fn parse_program(source: &str) -> Option<ast::Program> {
 
 #[cfg(test)]
 mod tests {
+    use crate::ast::{Comparisson, Number};
+
     use super::ast;
     use super::parse_program;
-    use crate::ast::Number;
 
     #[test]
     fn test_parse_empty() {
@@ -201,13 +281,75 @@ mod tests {
     }
 
     #[test]
-    fn test_assign_variable() {
+    fn test_assign_int_variable() {
         let parse_ast = parse_program(r#"numero = 10"#);
         assert_eq!(parse_ast, Some(ast::Program {
             statements: vec![ast::Statement::Assign {
                 targets: vec![ast::Expression::Identifier { name: "numero".into() }],
                 value: ast::Expression::Num { value: Number::Integer { value: 10 } },
             }]
+        }))
+    }
+
+    #[test]
+    fn test_assign_float_variable() {
+        let parse_ast = parse_program(r#"real = 10.0"#);
+        assert_eq!(parse_ast, Some(ast::Program {
+            statements: vec![ast::Statement::Assign {
+                targets: vec![ast::Expression::Identifier { name: "real".into() }],
+                value: ast::Expression::Num { value: Number::Float { value: 10.0 } },
+            }]
+        }))
+    }
+
+    #[test]
+    fn test_assign_string_variable() {
+        let parse_ast = parse_program(r#"nome = "coral""#);
+        assert_eq!(parse_ast, Some(ast::Program {
+            statements: vec![ast::Statement::Assign {
+                targets: vec![ast::Expression::Identifier { name: "nome".into() }],
+                value: ast::Expression::Str { value: "coral".into() },
+            }]
+        }))
+    }
+
+    #[test]
+    fn test_comparission_less() {
+        let parse_ast = parse_program(r#"1 < 5"#);
+        assert_eq!(parse_ast, Some(ast::Program {
+            statements: vec![
+                ast::Statement::Expr {
+                    expression: ast::Expression::Compare {
+                        a: Box::new(ast::Expression::Num {
+                            value: Number::Integer { value: 1 }
+                        }),
+                        op: Comparisson::Less,
+                        b: Box::new(ast::Expression::Num {
+                            value: Number::Integer { value: 5 }
+                        }),
+                    }
+                }
+            ]
+        }))
+    }
+
+    #[test]
+    fn test_comparission_less_than() {
+        let parse_ast = parse_program(r#"1 <= 5"#);
+        assert_eq!(parse_ast, Some(ast::Program {
+            statements: vec![
+                ast::Statement::Expr {
+                    expression: ast::Expression::Compare {
+                        a: Box::new(ast::Expression::Num {
+                            value: Number::Integer { value: 1 }
+                        }),
+                        op: Comparisson::LessThan,
+                        b: Box::new(ast::Expression::Num {
+                            value: Number::Integer { value: 5 }
+                        }),
+                    }
+                }
+            ]
         }))
     }
 }

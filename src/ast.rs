@@ -1,3 +1,6 @@
+use crate::token::Token;
+use crate::ast::Expression::Compare;
+
 #[derive(Debug, PartialEq)]
 pub enum UnaryOperation {
     Minus,
@@ -31,6 +34,18 @@ pub enum Comparisson {
     NotIn,
     Is,
     NotIs,
+}
+
+impl From<Token> for Comparisson {
+    fn from(tk: Token) -> Self {
+        match tk {
+            Token::Less => Comparisson::Less,
+            Token::LessThan => Comparisson::LessThan,
+            Token::Greater => Comparisson::Greater,
+            Token::GreaterThan => Comparisson::GreaterThan,
+            _ => panic!("unit type isn't a real type")
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -92,6 +107,15 @@ pub enum Expression {
 
 #[derive(Debug, PartialEq)]
 pub enum Statement {
+//    FunctionDef,
+//    ClassDef,
+//    Delete {},
+//    For,
+//    While,
+//    If,
+//    Raise,
+//    Try,
+
     Break,
     Continue,
     Pass,
