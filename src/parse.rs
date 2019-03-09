@@ -1,5 +1,5 @@
 use crate::ast;
-use crate::ast::{Comparison, Expression, Number, Statement};
+use crate::ast::{BooleanOperation, Comparison, Expression, Number, Operator, Statement, UnaryOperation};
 use crate::token::Token;
 use crate::tokenizer::scan;
 use crate::tokens::Tokens;
@@ -30,7 +30,6 @@ impl Parser {
                     statements.push(statement);
                 }
                 Err(error) => {
-                    eprintln!("got error: ParseError {:?}", error);
                     errors.push(error);
                     break;
                 }
@@ -117,12 +116,35 @@ impl Parser {
                         b: Box::new(self.factor().unwrap()),
                     });
                 }
+                Token::Plus | Token::Minus | Token::Slash | Token::Star => {
+                    self.advance();
+                    a = Some(ast::Expression::BinOp {
+                        a: Box::new(a.unwrap()),
+                        op: Operator::from(token),
+                        b: Box::new(self.factor().unwrap()),
+                    });
+                }
+                Token::E | Token::Ou => {
+                    self.advance();
+                    a = Some(ast::Expression::BoolOp {
+                        a: Box::new(a.unwrap()),
+                        op: BooleanOperation::from(token),
+                        b: Box::new(self.factor().unwrap()),
+                    })
+                }
+                Token::Nao | Token::Minus => {
+                    self.advance();
+                    a = Some(ast::Expression::UnOp {
+                        op: UnaryOperation::from(token),
+                        a: Box::new(self.factor().unwrap()),
+                    })
+                }
                 _ => {
-                    break
+                    break;
                 }
             }
         }
-        return a
+        return a;
     }
 
     fn factor(&mut self) -> Option<ast::Expression> {
@@ -142,6 +164,10 @@ impl Parser {
             Some(Token::Texto(value)) => {
                 let _ = self.advance();
                 Some(ast::Expression::Str { value })
+            }
+            Some(Token::Logico(value)) => {
+                let _ = self.advance();
+                Some(if value { ast::Expression::True } else { ast::Expression::False })
             }
             _ => None,
         }
@@ -226,7 +252,7 @@ pub fn parse_program(source: &str) -> Option<ast::Program> {
 
 #[cfg(test)]
 mod tests {
-    use crate::ast::{Comparison, Number};
+    use crate::ast::{BooleanOperation, Comparison, Number, Operator, UnaryOperation};
 
     use super::ast;
     use super::parse_program;
@@ -314,7 +340,7 @@ mod tests {
     }
 
     #[test]
-    fn test_comparission_less() {
+    fn test_comparision_less() {
         let parse_ast = parse_program(r#"1 < 5"#);
         assert_eq!(parse_ast, Some(ast::Program {
             statements: vec![
@@ -334,7 +360,7 @@ mod tests {
     }
 
     #[test]
-    fn test_comparission_less_than() {
+    fn test_comparision_less_than() {
         let parse_ast = parse_program(r#"1 <= 5"#);
         assert_eq!(parse_ast, Some(ast::Program {
             statements: vec![
@@ -351,5 +377,60 @@ mod tests {
                 }
             ]
         }))
+    }
+
+    #[test]
+    fn test_bin_or_comparision() {
+        let parse_ast = parse_program(r#"Verdadeiro ou Falso"#);
+        assert_eq!(parse_ast, Some(ast::Program {
+            statements: vec![
+                ast::Statement::Expr {
+                    expression: ast::Expression::BoolOp {
+                        a: Box::new(ast::Expression::True),
+                        op: BooleanOperation::Or,
+                        b: Box::new(ast::Expression::False),
+                    }
+                }
+            ]
+        }))
+    }
+
+    #[test]
+    fn test_bin_sum_operation() {
+        let parse_ast = parse_program(r#"1 + 5"#);
+        assert_eq!(parse_ast, Some(ast::Program {
+            statements: vec![
+                ast::Statement::Expr {
+                    expression: ast::Expression::BinOp {
+                        a: Box::new(ast::Expression::Num {
+                            value: Number::Integer { value: 1 }
+                        }),
+                        op: Operator::Add,
+                        b: Box::new(ast::Expression::Num {
+                            value: Number::Integer { value: 5 }
+                        }),
+                    }
+                }
+            ]
+        }))
+    }
+
+    #[test]
+    fn test_not_unary_operation() {
+        // FIXME: unary minus need be fixed!
+        let parse_ast = parse_program(r#"nao Falso"#);
+        assert_eq!(
+            parse_ast,
+            Some(ast::Program {
+                statements: vec![
+                    ast::Statement::Expr {
+                        expression: ast::Expression::UnOp {
+                            op: UnaryOperation::Not,
+                            a: Box::new(ast::Expression::False),
+                        }
+                    }
+                ]
+            })
+        )
     }
 }

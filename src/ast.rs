@@ -1,5 +1,5 @@
 use crate::token::Token;
-use crate::ast::Expression::Compare;
+use crate::ast::Expression::{Compare, BoolOp};
 
 #[derive(Debug, PartialEq)]
 pub enum UnaryOperation {
@@ -7,10 +7,30 @@ pub enum UnaryOperation {
     Not,
 }
 
+impl From<Token> for UnaryOperation {
+    fn from(tk: Token) -> Self {
+        match tk {
+            Token::Nao => UnaryOperation::Not,
+            Token::Minus => UnaryOperation::Minus,
+            _ => panic!("ins't token for boolean operation!")
+        }
+    }
+}
+
 #[derive(Debug, PartialEq)]
 pub enum BooleanOperation {
     And,
     Or,
+}
+
+impl From<Token> for BooleanOperation {
+    fn from(tk: Token) -> Self {
+        match tk {
+            Token::E => BooleanOperation::And,
+            Token::Ou => BooleanOperation::Or,
+            _ => panic!("ins't token for boolean operation!")
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]
@@ -20,6 +40,19 @@ pub enum Operator {
     Mul,
     Div,
     Mod,
+}
+
+impl From<Token> for Operator {
+    fn from(tk: Token) -> Self {
+        match tk {
+            Token::Plus => Operator::Add,
+            Token::Minus => Operator::Sub,
+            Token::Slash => Operator::Div,
+            Token::Star => Operator::Mul,
+            Token::Percent => Operator::Mod,
+            _ => panic!("unit type isn't a real type")
+        }
+    }
 }
 
 #[derive(Debug, PartialEq)]
