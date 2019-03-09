@@ -23,7 +23,7 @@ pub enum Operator {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum Comparisson {
+pub enum Comparison {
     Equal,
     NotEqual,
     Greater,
@@ -36,13 +36,13 @@ pub enum Comparisson {
     NotIs,
 }
 
-impl From<Token> for Comparisson {
+impl From<Token> for Comparison {
     fn from(tk: Token) -> Self {
         match tk {
-            Token::Less => Comparisson::Less,
-            Token::LessThan => Comparisson::LessThan,
-            Token::Greater => Comparisson::Greater,
-            Token::GreaterThan => Comparisson::GreaterThan,
+            Token::Less => Comparison::Less,
+            Token::LessThan => Comparison::LessThan,
+            Token::Greater => Comparison::Greater,
+            Token::GreaterThan => Comparison::GreaterThan,
             _ => panic!("unit type isn't a real type")
         }
     }
@@ -64,7 +64,7 @@ pub struct Keyword {
 pub enum Expression {
     Compare {
         a: Box<Expression>,
-        op: Comparisson,
+        op: Comparison,
         b: Box<Expression>,
     },
     BoolOp {

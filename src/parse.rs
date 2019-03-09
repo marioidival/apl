@@ -1,5 +1,5 @@
 use crate::ast;
-use crate::ast::{Comparisson, Expression, Number, Statement};
+use crate::ast::{Comparison, Expression, Number, Statement};
 use crate::token::Token;
 use crate::tokenizer::scan;
 use crate::tokens::Tokens;
@@ -113,7 +113,7 @@ impl Parser {
                     self.advance();
                     a = Some(ast::Expression::Compare {
                         a: Box::new(a.unwrap()),
-                        op: Comparisson::from(token),
+                        op: Comparison::from(token),
                         b: Box::new(self.factor().unwrap()),
                     });
                 }
@@ -226,7 +226,7 @@ pub fn parse_program(source: &str) -> Option<ast::Program> {
 
 #[cfg(test)]
 mod tests {
-    use crate::ast::{Comparisson, Number};
+    use crate::ast::{Comparison, Number};
 
     use super::ast;
     use super::parse_program;
@@ -323,7 +323,7 @@ mod tests {
                         a: Box::new(ast::Expression::Num {
                             value: Number::Integer { value: 1 }
                         }),
-                        op: Comparisson::Less,
+                        op: Comparison::Less,
                         b: Box::new(ast::Expression::Num {
                             value: Number::Integer { value: 5 }
                         }),
@@ -343,7 +343,7 @@ mod tests {
                         a: Box::new(ast::Expression::Num {
                             value: Number::Integer { value: 1 }
                         }),
-                        op: Comparisson::LessThan,
+                        op: Comparison::LessThan,
                         b: Box::new(ast::Expression::Num {
                             value: Number::Integer { value: 5 }
                         }),
