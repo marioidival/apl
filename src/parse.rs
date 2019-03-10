@@ -108,7 +108,7 @@ impl Parser {
         let mut a = self.factor();
         while let Some(token) = self.current() {
             match token {
-                Token::Less | Token::LessThan | Token::Greater | Token::GreaterThan => {
+                Token::Less | Token::LessThan | Token::Greater | Token::GreaterThan | Token::BangEqual | Token::EqualEqual => {
                     self.advance();
                     a = Some(ast::Expression::Compare {
                         a: Box::new(a.unwrap()),
@@ -390,6 +390,25 @@ mod tests {
                             value: Number::Integer { value: 1 }
                         }),
                         op: Comparison::LessThan,
+                        b: Box::new(ast::Expression::Num {
+                            value: Number::Integer { value: 5 }
+                        }),
+                    }
+                }
+            ]
+        }))
+    }
+
+    fn test_comparision_equal_equal() {
+        let parse_ast = parse_program(r#"1 == 1"#);
+        assert_eq!(parse_ast, Some(ast::Program {
+            statements: vec![
+                ast::Statement::Expr {
+                    expression: ast::Expression::Compare {
+                        a: Box::new(ast::Expression::Num {
+                            value: Number::Integer { value: 1 }
+                        }),
+                        op: Comparison::Equal,
                         b: Box::new(ast::Expression::Num {
                             value: Number::Integer { value: 5 }
                         }),

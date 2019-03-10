@@ -76,6 +76,8 @@ impl From<Token> for Comparison {
             Token::LessThan => Comparison::LessThan,
             Token::Greater => Comparison::Greater,
             Token::GreaterThan => Comparison::GreaterThan,
+            Token::EqualEqual => Comparison::Equal,
+            Token::BangEqual => Comparison::NotEqual,
             _ => panic!("unit type isn't a real type")
         }
     }
