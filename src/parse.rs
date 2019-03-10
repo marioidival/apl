@@ -399,6 +399,7 @@ mod tests {
         }))
     }
 
+    #[test]
     fn test_comparision_equal_equal() {
         let parse_ast = parse_program(r#"1 == 1"#);
         assert_eq!(parse_ast, Some(ast::Program {
