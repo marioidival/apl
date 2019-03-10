@@ -183,13 +183,8 @@ impl Parser {
             return None;
         }
 
-        let args = match self.current() {
-            Some(Token::Texto(msg)) => {
-                let _ = self.advance();
-                vec![ast::Expression::Str { value: msg }]
-            }
-            _ => vec![ast::Expression::Str { value: "".into() }]
-        };
+        let args = vec![self.expression().unwrap()];
+
         if !self.consume(&Token::ParentClose) {
             return None;
         }
@@ -299,6 +294,31 @@ mod tests {
                     expression: ast::Expression::Call {
                         function: Box::new(ast::Expression::Identifier { name: String::from("imprima") }),
                         args: vec![ast::Expression::Str { value: String::from("Olá pequeno gafanhoto!") }],
+                        keywords: vec![],
+                    }
+                }
+            ]
+        }))
+    }
+
+    #[test]
+    fn test_sum_in_print() {
+        let parse_ast = parse_program(r#"imprima(5 + 3 - 2)"#);
+
+        assert_eq!(parse_ast, Some(ast::Program {
+            statements: vec![
+                ast::Statement::Expr {
+                    expression: ast::Expression::Call {
+                        function: Box::new(ast::Expression::Identifier { name: String::from("imprima") }),
+                        args: vec![ast::Expression::BinOp {
+                            a: Box::new(ast::Expression::BinOp {
+                                a: Box::new(ast::Expression::Num { value: ast::Number::Integer { value: 5 } }),
+                                op: Operator::Add,
+                                b: Box::new(ast::Expression::Num { value: ast::Number::Integer { value: 3 } }),
+                            }),
+                            op: Operator::Sub,
+                            b: Box::new(ast::Expression::Num { value: ast::Number::Integer { value: 2 } }),
+                        }],
                         keywords: vec![],
                     }
                 }
