@@ -411,7 +411,7 @@ mod tests {
                         }),
                         op: Comparison::Equal,
                         b: Box::new(ast::Expression::Num {
-                            value: Number::Integer { value: 5 }
+                            value: Number::Integer { value: 1 }
                         }),
                     }
                 }
