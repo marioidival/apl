@@ -2,6 +2,8 @@ use crate::error::Error;
 use crate::error::OperatorError;
 use self::Primitive::*;
 
+type Result<T> = ::std::result::Result<T, Error>;
+
 #[derive(Debug, Clone, PartialEq)]
 pub enum Primitive {
     Integer(i64),
@@ -35,14 +37,14 @@ impl From<bool> for Primitive {
 }
 
 impl Primitive {
-    fn negate(&self) -> Result<Self, Error> {
+    pub fn negate(&self) -> Result<Self> {
         match self {
             Boolean(i) => Ok(Boolean(!*i)),
             left => Self::error(left, None, OperatorError::Negate)
         }
     }
 
-    fn and(&self, other: &Self) -> Result<Self, Error> {
+    pub fn and(&self, other: &Self) -> Result<Self> {
         let res = match (self, other) {
             (Boolean(left), Boolean(right)) => (*left && *right).into(),
             (left, right) => Self::error(left, Some(right), OperatorError::Add)?
@@ -50,7 +52,7 @@ impl Primitive {
         Ok(res)
     }
 
-    fn or(&self, other: &Self) -> Result<Self, Error> {
+    pub fn or(&self, other: &Self) -> Result<Self> {
         let res = match (self, other) {
             (Boolean(left), Boolean(right)) => (*left || *right).into(),
             (left, right) => Self::error(left, Some(right), OperatorError::Or)?
@@ -58,7 +60,7 @@ impl Primitive {
         Ok(res)
     }
 
-    fn eq(&self, other: &Self) -> Result<Self, Error> {
+    pub fn eq(&self, other: &Self) -> Result<Self> {
         let res = match (self, other) {
             (Integer(left), Integer(right)) => (*left == *right).into(),
             (Boolean(left), Boolean(right)) => (*left == *right).into(),
@@ -70,7 +72,7 @@ impl Primitive {
         Ok(res)
     }
 
-    fn not_eq(&self, other: &Self) -> Result<Self, Error> {
+    pub fn not_eq(&self, other: &Self) -> Result<Self> {
         let res = match (self, other) {
             (Integer(left), Integer(right)) => (*left != *right).into(),
             (Boolean(left), Boolean(right)) => (*left != *right).into(),
@@ -82,7 +84,7 @@ impl Primitive {
         Ok(res)
     }
 
-    fn less_than(&self, other: &Self) -> Result<Self, Error> {
+    pub fn less_than(&self, other: &Self) -> Result<Self> {
         let res = match (self, other) {
             (Integer(left), Integer(right)) => (*left < *right).into(),
             (Float(left), Float(right)) => (*left < *right).into(),
@@ -93,7 +95,7 @@ impl Primitive {
         Ok(res)
     }
 
-    fn less_than_equal(&self, other: &Self) -> Result<Self, Error> {
+    pub fn less_than_equal(&self, other: &Self) -> Result<Self> {
         let res = match (self, other) {
             (Integer(left), Integer(right)) => (*left <= *right).into(),
             (Float(left), Float(right)) => (*left <= *right).into(),
@@ -104,7 +106,7 @@ impl Primitive {
         Ok(res)
     }
 
-    fn greater_than(&self, other: &Self) -> Result<Self, Error> {
+    pub fn greater_than(&self, other: &Self) -> Result<Self> {
         let res = match (self, other) {
             (Integer(left), Integer(right)) => (*left > *right).into(),
             (Float(left), Float(right)) => (*left > *right).into(),
@@ -115,7 +117,7 @@ impl Primitive {
         Ok(res)
     }
 
-    fn greater_than_equal(&self, other: &Self) -> Result<Self, Error> {
+    pub fn greater_than_equal(&self, other: &Self) -> Result<Self> {
         let res = match (self, other) {
             (Integer(left), Integer(right)) => (*left >= *right).into(),
             (Float(left), Float(right)) => (*left >= *right).into(),
@@ -126,7 +128,7 @@ impl Primitive {
         Ok(res)
     }
 
-    fn add(&self, other: &Self) -> Result<Self, Error> {
+    pub fn add(&self, other: &Self) -> Result<Self> {
         let res = match (self, other) {
             (Integer(left), Integer(right)) => (left + right).into(),
             (Float(left), Float(right)) => (left + right).into(),
@@ -137,7 +139,7 @@ impl Primitive {
         Ok(res)
     }
 
-    fn sub(&self, other: &Self) -> Result<Self, Error> {
+    pub fn sub(&self, other: &Self) -> Result<Self> {
         let res = match (self, other) {
             (Integer(left), Integer(right)) => (left - right).into(),
             (Float(left), Float(right)) => (left - right).into(),
@@ -148,7 +150,7 @@ impl Primitive {
         Ok(res)
     }
 
-    fn mul(&self, other: &Self) -> Result<Self, Error> {
+    pub fn mul(&self, other: &Self) -> Result<Self> {
         let res = match (self, other) {
             (Integer(left), Integer(right)) => (left * right).into(),
             (Float(left), Float(right)) => (left * right).into(),
@@ -159,7 +161,7 @@ impl Primitive {
         Ok(res)
     }
 
-    fn real_div(&self, other: &Self) -> Result<Self, Error> {
+    pub fn real_div(&self, other: &Self) -> Result<Self> {
         let res = match (self, other) {
             (Integer(left), Integer(right)) => ((*left as f64) / (*right as f64)).into(),
             (Float(left), Float(right)) => (left / right).into(),
@@ -170,7 +172,7 @@ impl Primitive {
         Ok(res)
     }
 
-    fn int_div(&self, other: &Self) -> Result<Self, Error> {
+    pub fn int_div(&self, other: &Self) -> Result<Self> {
         let res = match (self, other) {
             (Integer(left), Integer(right)) => (left / right).into(),
             (left, right) => Self::error(left, Some(right), OperatorError::IntDiv)?,
@@ -178,7 +180,7 @@ impl Primitive {
         Ok(res)
     }
 
-    fn error<T>(left: &Self, right: Option<&Self>, op: OperatorError) -> Result<T, Error> {
+    fn error<T>(left: &Self, right: Option<&Self>, op: OperatorError) -> Result<T> {
         Err(Error::InvalidOperation(op, left.clone(), right.cloned()))
     }
 }
