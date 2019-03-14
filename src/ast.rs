@@ -363,6 +363,58 @@ impl Primitive {
         Ok(res)
     }
 
+    fn add(&self, other: &Self) -> Result<Self, Error> {
+        let res = match (self, other) {
+            (Integer(left), Integer(right)) => (left + right).into(),
+            (Float(left), Float(right)) => (left + right).into(),
+            (Float(left), Integer(right)) => (left + (*right as f64)).into(),
+            (Integer(left), Float(right)) => ((*left as f64) + right).into(),
+            (left, right) => Self::error(left, Some(right), OperatorError::Add)?,
+        };
+        Ok(res)
+    }
+
+    fn sub(&self, other: &Self) -> Result<Self, Error> {
+        let res = match (self, other) {
+            (Integer(left), Integer(right)) => (left - right).into(),
+            (Float(left), Float(right)) => (left - right).into(),
+            (Float(left), Integer(right)) => (left - (*right as f64)).into(),
+            (Integer(left), Float(right)) => ((*left as f64) - right).into(),
+            (left, right) => Self::error(left, Some(right), OperatorError::Sub)?,
+        };
+        Ok(res)
+    }
+
+    fn mul(&self, other: &Self) -> Result<Self, Error> {
+        let res = match (self, other) {
+            (Integer(left), Integer(right)) => (left * right).into(),
+            (Float(left), Float(right)) => (left * right).into(),
+            (Float(left), Integer(right)) => (left * (*right as f64)).into(),
+            (Integer(left), Float(right)) => ((*left as f64) * right).into(),
+            (left, right) => Self::error(left, Some(right), OperatorError::Mul)?,
+        };
+        Ok(res)
+    }
+
+    fn real_div(&self, other: &Self) -> Result<Self, Error> {
+        let res = match (self, other) {
+            (Integer(left), Integer(right)) => ((*left as f64) / (*right as f64)).into(),
+            (Float(left), Float(right)) => (left / right).into(),
+            (Float(left), Integer(right)) => (left / (*right as f64)).into(),
+            (Integer(left), Float(right)) => ((*left as f64) / right).into(),
+            (left, right) => Self::error(left, Some(right), OperatorError::RealDiv)?,
+        };
+        Ok(res)
+    }
+
+    fn int_div(&self, other: &Self) -> Result<Self, Error> {
+        let res = match (self, other) {
+            (Integer(left), Integer(right)) => (left / right).into(),
+            (left, right) => Self::error(left, Some(right), OperatorError::IntDiv)?,
+        };
+        Ok(res)
+    }
+
     fn error<T>(left: &Self, right: Option<&Self>, op: OperatorError) -> Result<T, Error> {
         Err(Error::InvalidOperation(op, left.clone(), right.cloned()))
     }
@@ -586,4 +638,124 @@ mod primitive_tests {
         let b = Primitive::Integer(1);
         assert_eq!(Primitive::Boolean(true), a.greater_than_equal(&b).unwrap())
     }
+
+    #[test]
+    fn primitive_sum_int() {
+        let a = Primitive::Integer(1);
+        let b = Primitive::Integer(1);
+        assert_eq!(Primitive::Integer(2), a.add(&b).unwrap())
+    }
+
+    #[test]
+    fn primitive_sum_float() {
+        let a = Primitive::Float(1.0);
+        let b = Primitive::Float(1.0);
+        assert_eq!(Primitive::Float(2.0), a.add(&b).unwrap())
+    }
+
+    #[test]
+    fn primitive_sum_int_float() {
+        let a = Primitive::Integer(1);
+        let b = Primitive::Float(1.0);
+        assert_eq!(Primitive::Float(2.0), a.add(&b).unwrap())
+    }
+
+    #[test]
+    fn primitive_sum_float_int() {
+        let a = Primitive::Float(1.0);
+        let b = Primitive::Integer(1);
+        assert_eq!(Primitive::Float(2.0), a.add(&b).unwrap())
+    }
+
+    #[test]
+    fn primitive_sub_int() {
+        let a = Primitive::Integer(1);
+        let b = Primitive::Integer(1);
+        assert_eq!(Primitive::Integer(0), a.sub(&b).unwrap())
+    }
+
+    #[test]
+    fn primitive_sub_float() {
+        let a = Primitive::Float(1.0);
+        let b = Primitive::Float(1.0);
+        assert_eq!(Primitive::Float(0.0), a.sub(&b).unwrap())
+    }
+
+    #[test]
+    fn primitive_sub_int_float() {
+        let a = Primitive::Integer(1);
+        let b = Primitive::Float(1.0);
+        assert_eq!(Primitive::Float(0.0), a.sub(&b).unwrap())
+    }
+
+    #[test]
+    fn primitive_sub_float_int() {
+        let a = Primitive::Float(1.0);
+        let b = Primitive::Integer(1);
+        assert_eq!(Primitive::Float(0.0), a.sub(&b).unwrap())
+    }
+
+    #[test]
+    fn primitive_mul_int() {
+        let a = Primitive::Integer(1);
+        let b = Primitive::Integer(1);
+        assert_eq!(Primitive::Integer(1), a.mul(&b).unwrap())
+    }
+
+    #[test]
+    fn primitive_mul_float() {
+        let a = Primitive::Float(1.0);
+        let b = Primitive::Float(1.0);
+        assert_eq!(Primitive::Float(1.0), a.mul(&b).unwrap())
+    }
+
+    #[test]
+    fn primitive_mul_int_float() {
+        let a = Primitive::Integer(1);
+        let b = Primitive::Float(1.0);
+        assert_eq!(Primitive::Float(1.0), a.mul(&b).unwrap())
+    }
+
+    #[test]
+    fn primitive_mul_float_int() {
+        let a = Primitive::Float(1.0);
+        let b = Primitive::Integer(1);
+        assert_eq!(Primitive::Float(1.0), a.mul(&b).unwrap())
+    }
+
+    #[test]
+    fn primitive_div_real_int() {
+        let a = Primitive::Integer(1);
+        let b = Primitive::Integer(1);
+        assert_eq!(Primitive::Float(1.0), a.real_div(&b).unwrap())
+    }
+
+    #[test]
+    fn primitive_div_real_float() {
+        let a = Primitive::Float(1.0);
+        let b = Primitive::Float(1.0);
+        assert_eq!(Primitive::Float(1.0), a.real_div(&b).unwrap())
+    }
+
+    #[test]
+    fn primitive_div_real_int_float() {
+        let a = Primitive::Integer(1);
+        let b = Primitive::Float(1.0);
+        assert_eq!(Primitive::Float(1.0), a.real_div(&b).unwrap())
+    }
+
+    #[test]
+    fn primitive_div_real_float_int() {
+        let a = Primitive::Float(1.0);
+        let b = Primitive::Integer(1);
+        assert_eq!(Primitive::Float(1.0), a.real_div(&b).unwrap())
+    }
+
+    #[test]
+    fn primitive_div_int_int() {
+        let a = Primitive::Integer(10);
+        let b = Primitive::Integer(2);
+        assert_eq!(Primitive::Integer(5), a.int_div(&b).unwrap())
+    }
+
 }
