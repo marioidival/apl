@@ -5,3 +5,6 @@ mod tokenizer;
 mod ast;
 mod parse;
 mod tokens;
+mod error;
+mod primitive;
+mod interpreter;
