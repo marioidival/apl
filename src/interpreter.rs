@@ -1,4 +1,4 @@
-use crate::ast::{Comparison, Expression, Program};
+use crate::ast::{Comparison, Expression, Program, BooleanOperation};
 use crate::ast::Statement;
 use crate::error::Error;
 use crate::error::Error::OtherError;
@@ -69,11 +69,14 @@ impl Interpreter {
                     _ => Err(Error::OtherError("Not Implemented yet".into()))
                 }
             }
-//            Expression::BoolOp { a, op, b } => {
-//                println!("value a: {:?}", a);
-//                println!("bool op: {:?}", op);
-//                println!("value b: {:?}", b);
-//            }
+            Expression::BoolOp { a, op, b } => {
+                let a_obj = self.visit_expression(*a)?;
+                let b_obj = self.visit_expression(*b)?;
+                match op {
+                    BooleanOperation::And => a_obj.and(&b_obj),
+                    BooleanOperation::Or => a_obj.or(&b_obj),
+                }
+            }
 //            Expression::UnOp { op, a } => {
 //                println!("value a: {:?}", a);
 //                println!("unary op: {:?}", op);
@@ -84,6 +87,8 @@ impl Interpreter {
             Expression::Num { value } => {
                 Ok(value.into())
             }
+            Expression::True => Ok(true.into()),
+            Expression::False => Ok(false.into()),
 //            Expression::Identifier { name } => {
 //                println!("identifier: {:?}", name);
 //            }
@@ -93,6 +98,7 @@ impl Interpreter {
 }
 
 
+#[cfg(test)]
 mod comparison {
     use crate::interpreter::Interpreter;
     use crate::object::Object;
@@ -150,6 +156,31 @@ mod comparison {
     #[test]
     fn is() {
         let mut parser_ast = parse_program(r#"1 é 0"#);
+        let interpreter = Interpreter::init();
+        let result = interpreter.eval(parser_ast.unwrap());
+        assert_eq!(Object::Primitive(Boolean(true)), result.unwrap())
+    }
+}
+
+#[cfg(test)]
+mod bool_operation {
+    use crate::interpreter::Interpreter;
+    use crate::object::Object;
+    use crate::parse::parse_program;
+    use crate::primitive::Primitive::Boolean;
+
+    #[test]
+    fn and() {
+        let mut parser_ast = parse_program(r#"Verdadeiro e Verdadeiro"#);
+        let interpreter = Interpreter::init();
+        let result = interpreter.eval(parser_ast.unwrap());
+        assert_eq!(Object::Primitive(Boolean(true)), result.unwrap())
+    }
+
+
+    #[test]
+    fn or() {
+        let mut parser_ast = parse_program(r#"Verdadeiro e Verdadeiro"#);
         let interpreter = Interpreter::init();
         let result = interpreter.eval(parser_ast.unwrap());
         assert_eq!(Object::Primitive(Boolean(true)), result.unwrap())
