@@ -5,6 +5,7 @@ use crate::object::Object;
 pub enum Error {
     InvalidOperation(OperatorError, Primitive, Option<Primitive>),
     InvalidType(OperatorError, Object, Option<Object>),
+    OtherError(String),
 }
 
 
@@ -30,4 +31,6 @@ pub enum OperatorError {
     GreaterThanEqual,
     Equal,
     NotEqual,
+    Is,
+    NotIs
 }

@@ -128,6 +128,17 @@ impl Primitive {
         Ok(res)
     }
 
+    pub fn is(&self, other: &Self) -> Result<Self> {
+        let res = match (self, other) {
+            (Integer(_), Integer(_)) => (true).into(),
+            (Float(_), Float(_)) => (true).into(),
+            (Boolean(_), Boolean(_)) => (true).into(),
+            (Str(_), Str(_)) => (true).into(),
+            (left, right) => (false).into(),
+        };
+        Ok(res)
+    }
+
     pub fn add(&self, other: &Self) -> Result<Self> {
         let res = match (self, other) {
             (Integer(left), Integer(right)) => (left + right).into(),
@@ -519,5 +530,19 @@ mod tests {
         let a = Primitive::Integer(10);
         let b = Primitive::Integer(2);
         assert_eq!(Primitive::Integer(5), a.int_div(&b).unwrap())
+    }
+
+    #[test]
+    fn primitive_is() {
+        let a = Primitive::Integer(10);
+        let b = Primitive::Integer(2);
+        assert_eq!(Primitive::Boolean(true), a.is(&b).unwrap())
+    }
+
+    #[test]
+    fn primitive_is_false_result() {
+        let a = Primitive::Integer(10);
+        let b = Primitive::Float(2.0);
+        assert_eq!(Primitive::Boolean(false), a.is(&b).unwrap())
     }
 }

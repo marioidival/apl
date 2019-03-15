@@ -1,11 +1,13 @@
 use crate::error::{Error, OperatorError};
 use crate::primitive::Primitive;
+use crate::ast::Number;
 
 type Result<T> = ::std::result::Result<T, Error>;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum Object {
     Primitive(Primitive),
+    Unit,
 }
 
 impl From<i64> for Object {
@@ -29,6 +31,15 @@ impl From<String> for Object {
 impl From<bool> for Object {
     fn from(n: bool) -> Self {
         Object::Primitive(Primitive::Boolean(n))
+    }
+}
+
+impl From<Number> for Object {
+    fn from(s: Number) -> Self {
+        match s {
+            Number::Integer { value } => Object::Primitive(Primitive::Integer(value)),
+            Number::Float { value } => Object::Primitive(Primitive::Float(value))
+        }
     }
 }
 
@@ -91,6 +102,13 @@ impl Object {
         match (self, other) {
             (Object::Primitive(l), Object::Primitive(r)) => Ok(l.or(r)?.into()),
             (_, r) => self.error(Some(r), OperatorError::Or),
+        }
+    }
+
+    pub fn is(&self, other: &Self) -> Result<Self> {
+        match (self, other) {
+            (Object::Primitive(l), Object::Primitive(r)) => Ok(l.is(r)?.into()),
+            (_, r) => self.error(Some(r), OperatorError::Is),
         }
     }
 
@@ -475,5 +493,20 @@ mod tests {
         let a = Object::Primitive(Primitive::Integer(10));
         let b = Object::Primitive(Primitive::Integer(2));
         assert_eq!(Object::Primitive(Primitive::Integer(5)), a.int_divide(&b).unwrap())
+    }
+
+
+    #[test]
+    fn primitive_is() {
+        let a = Object::Primitive(Primitive::Integer(10));
+        let b = Object::Primitive(Primitive::Integer(2));
+        assert_eq!(Object::Primitive(Primitive::Boolean(true)), a.is(&b).unwrap())
+    }
+
+    #[test]
+    fn primitive_is_false_result() {
+        let a = Object::Primitive(Primitive::Integer(10));
+        let b = Object::Primitive(Primitive::Float(2.0));
+        assert_eq!(Object::Primitive(Primitive::Boolean(false)), a.is(&b).unwrap())
     }
 }
