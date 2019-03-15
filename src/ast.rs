@@ -1,7 +1,8 @@
 use crate::ast::Comparison::In;
 use crate::ast::Expression::{BoolOp, Compare};
-use crate::token::Token;
+use crate::error::{Error, OperatorError};
 use crate::primitive::{Primitive, Primitive::*};
+use crate::token::Token;
 
 #[derive(Debug, PartialEq)]
 pub enum UnaryOperation {
@@ -182,33 +183,4 @@ pub enum Top {
 #[derive(Debug, PartialEq)]
 pub struct Program {
     pub statements: Vec<Statement>,
-}
-
-#[derive(Debug)]
-pub enum Object {
-    Primitive(Primitive),
-}
-
-impl From<i64> for Object {
-    fn from(n: i64) -> Self {
-        Object::Primitive(Primitive::Integer(n))
-    }
-}
-
-impl From<f64> for Object {
-    fn from(n: f64) -> Self {
-        Object::Primitive(Primitive::Float(n))
-    }
-}
-
-impl From<String> for Object {
-    fn from(n: String) -> Self {
-        Object::Primitive(Primitive::Str(n))
-    }
-}
-
-impl From<bool> for Object {
-    fn from(n: bool) -> Self {
-        Object::Primitive(Primitive::Boolean(n))
-    }
 }

@@ -1,8 +1,10 @@
 use crate::primitive::Primitive;
+use crate::object::Object;
 
 #[derive(Debug)]
 pub enum Error {
     InvalidOperation(OperatorError, Primitive, Option<Primitive>),
+    InvalidType(OperatorError, Object, Option<Object>),
 }
 
 

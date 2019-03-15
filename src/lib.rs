@@ -8,3 +8,4 @@ mod tokens;
 mod error;
 mod primitive;
 mod interpreter;
+mod object;
