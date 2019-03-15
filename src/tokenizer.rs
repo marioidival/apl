@@ -185,6 +185,7 @@ impl<'a> Tokenizer<'a> {
             "e" => Some(Token::E),
             "ou" => Some(Token::Ou),
             "nao" => Some(Token::Nao),
+            "é" => Some(Token::Is),
             "remova" => Some(Token::Remova),
             "interrompa" => Some(Token::Interrompa),
             "retorne" => Some(Token::Retorne),
@@ -400,9 +401,12 @@ mod tests {
     }
 
     #[test]
-    fn test_scan_next_keywords_del_and_in_identifier() {
+    fn test_scan_next_keywords_del_is_and_in_identifier() {
         let mut tokenizer = Tokenizer::init("remova");
         assert_eq!(Some(Token::Remova), tokenizer.scan_next());
+
+        let mut tokenizer = Tokenizer::init("é");
+        assert_eq!(Some(Token::Is), tokenizer.scan_next());
 
         let mut tokenizer = Tokenizer::init("em");
         assert_eq!(Some(Token::Em), tokenizer.scan_next())

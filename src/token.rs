@@ -40,6 +40,8 @@ pub enum Token {
     Remova,
     // in
     Em,
+    // is , [E0658]: non-ascii idents are not fully supported. (see issue #55467)
+    Is,
     // assert
     Verifique,
     // break
