@@ -93,14 +93,14 @@ impl Interpreter {
 }
 
 
-mod tests {
+mod comparison {
     use crate::interpreter::Interpreter;
     use crate::object::Object;
     use crate::parse::parse_program;
     use crate::primitive::Primitive::Boolean;
 
     #[test]
-    fn interpreter_comparison_equal() {
+    fn equal() {
         let mut parser_ast = parse_program(r#"1 == 0"#);
         let interpreter = Interpreter::init();
         let result = interpreter.eval(parser_ast.unwrap());
@@ -108,7 +108,7 @@ mod tests {
     }
 
     #[test]
-    fn interpreter_comparison_not_equal() {
+    fn not_equal() {
         let mut parser_ast = parse_program(r#"1 != 0"#);
         let interpreter = Interpreter::init();
         let result = interpreter.eval(parser_ast.unwrap());
@@ -116,7 +116,7 @@ mod tests {
     }
 
     #[test]
-    fn interpreter_comparison_greater() {
+    fn greater() {
         let mut parser_ast = parse_program(r#"1 > 0"#);
         let interpreter = Interpreter::init();
         let result = interpreter.eval(parser_ast.unwrap());
@@ -124,7 +124,7 @@ mod tests {
     }
 
     #[test]
-    fn interpreter_comparison_less() {
+    fn less() {
         let mut parser_ast = parse_program(r#"1 < 0"#);
         let interpreter = Interpreter::init();
         let result = interpreter.eval(parser_ast.unwrap());
@@ -132,7 +132,7 @@ mod tests {
     }
 
     #[test]
-    fn interpreter_comparison_greater_equal() {
+    fn greater_equal() {
         let mut parser_ast = parse_program(r#"1 >= 0"#);
         let interpreter = Interpreter::init();
         let result = interpreter.eval(parser_ast.unwrap());
@@ -140,10 +140,18 @@ mod tests {
     }
 
     #[test]
-    fn interpreter_comparison_less_equal() {
+    fn less_equal() {
         let mut parser_ast = parse_program(r#"1 <= 0"#);
         let interpreter = Interpreter::init();
         let result = interpreter.eval(parser_ast.unwrap());
         assert_eq!(Object::Primitive(Boolean(false)), result.unwrap())
+    }
+
+    #[test]
+    fn is() {
+        let mut parser_ast = parse_program(r#"1 é 0"#);
+        let interpreter = Interpreter::init();
+        let result = interpreter.eval(parser_ast.unwrap());
+        assert_eq!(Object::Primitive(Boolean(true)), result.unwrap())
     }
 }
