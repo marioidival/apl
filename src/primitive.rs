@@ -44,6 +44,23 @@ impl Primitive {
         }
     }
 
+    pub fn minus(&self) -> Result<Self> {
+        match self {
+            Integer(v) => Ok(Integer(-*v)),
+            Float(v) => Ok(Float(-*v)),
+            l => Self::error(l, None, OperatorError::UnarySub)
+        }
+    }
+
+    pub fn plus(&self) -> Result<Self> {
+        match self {
+            Integer(v) => Ok(Integer((-1 * *v))),
+            Float(v) => Ok(Float((-1.0 * *v))),
+            l => Self::error(l, None, OperatorError::UnaryPlus)
+        }
+    }
+
+
     pub fn and(&self, other: &Self) -> Result<Self> {
         let res = match (self, other) {
             (Boolean(left), Boolean(right)) => (*left && *right).into(),
@@ -544,5 +561,18 @@ mod tests {
         let a = Primitive::Integer(10);
         let b = Primitive::Float(2.0);
         assert_eq!(Primitive::Boolean(false), a.is(&b).unwrap())
+    }
+
+    #[test]
+    fn primitive_unary_minus() {
+        let a = Primitive::Integer(10);
+        assert_eq!(Primitive::Integer(-10), a.minus().unwrap())
+    }
+
+
+    #[test]
+    fn primitive_unary_plus() {
+        let a = Primitive::Integer(-10);
+        assert_eq!(Primitive::Integer(10), a.plus().unwrap())
     }
 }

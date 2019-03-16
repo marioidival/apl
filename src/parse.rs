@@ -118,11 +118,18 @@ impl Parser {
                 }
                 Token::Plus | Token::Minus | Token::Slash | Token::Star => {
                     self.advance();
-                    a = Some(ast::Expression::BinOp {
-                        a: Box::new(a.unwrap()),
-                        op: Operator::from(token),
-                        b: Box::new(self.factor().unwrap()),
-                    });
+                    if let Some(possible_factor) = a {
+                        a = Some(ast::Expression::BinOp {
+                            a: Box::new(possible_factor),
+                            op: Operator::from(token),
+                            b: Box::new(self.factor().unwrap()),
+                        });
+                    } else {
+                        a = Some(ast::Expression::UnOp {
+                            op: UnaryOperation::from(token),
+                            a: Box::new(self.factor().unwrap()),
+                        })
+                    }
                 }
                 Token::E | Token::Ou => {
                     self.advance();
@@ -132,7 +139,7 @@ impl Parser {
                         b: Box::new(self.factor().unwrap()),
                     })
                 }
-                Token::Nao | Token::Minus => {
+                Token::Nao => {
                     self.advance();
                     a = Some(ast::Expression::UnOp {
                         op: UnaryOperation::from(token),
@@ -477,7 +484,6 @@ mod tests {
 
     #[test]
     fn test_not_unary_operation() {
-        // FIXME: unary minus need be fixed!
         let parse_ast = parse_program(r#"nao Falso"#);
         assert_eq!(
             parse_ast,
@@ -487,6 +493,46 @@ mod tests {
                         expression: ast::Expression::UnOp {
                             op: UnaryOperation::Not,
                             a: Box::new(ast::Expression::False),
+                        }
+                    }
+                ]
+            })
+        )
+    }
+
+    #[test]
+    fn test_minus_unary_operation() {
+        let parse_ast = parse_program(r#"-1"#);
+        assert_eq!(
+            parse_ast,
+            Some(ast::Program {
+                statements: vec![
+                    ast::Statement::Expr {
+                        expression: ast::Expression::UnOp {
+                            op: UnaryOperation::Minus,
+                            a: Box::new(ast::Expression::Num {
+                                value: Number::Integer { value: 1 }
+                            }),
+                        }
+                    }
+                ]
+            })
+        )
+    }
+
+    #[test]
+    fn test_plus_unary_operation() {
+        let parse_ast = parse_program(r#"+1"#);
+        assert_eq!(
+            parse_ast,
+            Some(ast::Program {
+                statements: vec![
+                    ast::Statement::Expr {
+                        expression: ast::Expression::UnOp {
+                            op: UnaryOperation::Plus,
+                            a: Box::new(ast::Expression::Num {
+                                value: Number::Integer { value: 1 }
+                            }),
                         }
                     }
                 ]

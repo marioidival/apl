@@ -57,6 +57,20 @@ impl Object {
         self.error(None, OperatorError::Negate)
     }
 
+    pub fn unary_plus(&self) -> Result<Self> {
+        if let Object::Primitive(p) = self {
+            return Ok(p.plus()?.into());
+        }
+        self.error(None, OperatorError::UnarySub)
+    }
+
+    pub fn unary_minus(&self) -> Result<Self> {
+        if let Object::Primitive(p) = self {
+            return Ok(p.minus()?.into());
+        }
+        self.error(None, OperatorError::UnarySub)
+    }
+
     pub fn add(&self, other: &Self) -> Result<Self> {
         match (self, other) {
             (Object::Primitive(l), Object::Primitive(r)) => Ok(l.add(r)?.into()),
@@ -508,5 +522,19 @@ mod tests {
         let a = Object::Primitive(Primitive::Integer(10));
         let b = Object::Primitive(Primitive::Float(2.0));
         assert_eq!(Object::Primitive(Primitive::Boolean(false)), a.is(&b).unwrap())
+    }
+
+
+    #[test]
+    fn primitive_unary_minus() {
+        let a = Object::Primitive(Primitive::Integer(10));
+        assert_eq!(Object::Primitive(Primitive::Integer(-10)), a.unary_minus().unwrap())
+    }
+
+
+    #[test]
+    fn primitive_unary_plus() {
+        let a = Object::Primitive(Primitive::Integer(-10));
+        assert_eq!(Object::Primitive(Primitive::Integer(10)), a.unary_plus().unwrap())
     }
 }

@@ -22,6 +22,7 @@ pub enum OperatorError {
     IntDiv,
     RealDiv,
     UnarySub,
+    UnaryPlus,
     Negate,
     And,
     Or,

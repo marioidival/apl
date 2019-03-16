@@ -8,6 +8,7 @@ use crate::token::Token;
 pub enum UnaryOperation {
     Minus,
     Not,
+    Plus,
 }
 
 impl From<Token> for UnaryOperation {
@@ -15,7 +16,8 @@ impl From<Token> for UnaryOperation {
         match tk {
             Token::Nao => UnaryOperation::Not,
             Token::Minus => UnaryOperation::Minus,
-            _ => panic!("ins't token for boolean operation!")
+            Token::Plus => UnaryOperation::Plus,
+            _ => panic!("ins't token for unary operation!")
         }
     }
 }

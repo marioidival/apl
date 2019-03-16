@@ -1,4 +1,4 @@
-use crate::ast::{Comparison, Expression, Program, BooleanOperation};
+use crate::ast::{Comparison, Expression, Program, BooleanOperation, UnaryOperation};
 use crate::ast::Statement;
 use crate::error::Error;
 use crate::error::Error::OtherError;
@@ -77,10 +77,14 @@ impl Interpreter {
                     BooleanOperation::Or => a_obj.or(&b_obj),
                 }
             }
-//            Expression::UnOp { op, a } => {
-//                println!("value a: {:?}", a);
-//                println!("unary op: {:?}", op);
-//            }
+            Expression::UnOp { op, a } => {
+                let a_obj = self.visit_expression(*a)?;
+                match op {
+                    UnaryOperation::Not => a_obj.negate(),
+                    UnaryOperation::Minus => a_obj.unary_minus(),
+                    UnaryOperation::Plus => a_obj.unary_plus(),
+                }
+            }
             Expression::Str { value } => {
                 Ok(value.into())
             }
@@ -184,5 +188,38 @@ mod bool_operation {
         let interpreter = Interpreter::init();
         let result = interpreter.eval(parser_ast.unwrap());
         assert_eq!(Object::Primitive(Boolean(true)), result.unwrap())
+    }
+}
+
+#[cfg(test)]
+mod unary_operation {
+    use crate::interpreter::Interpreter;
+    use crate::object::Object;
+    use crate::parse::parse_program;
+    use crate::primitive::Primitive::{Boolean, Integer};
+
+    #[test]
+    fn not() {
+        let mut parser_ast = parse_program(r#"nao Falso"#);
+        let interpreter = Interpreter::init();
+        let result = interpreter.eval(parser_ast.unwrap());
+        assert_eq!(Object::Primitive(Boolean(true)), result.unwrap())
+    }
+
+    #[test]
+    fn minus() {
+        let mut parser_ast = parse_program(r#"-1"#);
+        let interpreter = Interpreter::init();
+        let result = interpreter.eval(parser_ast.unwrap());
+        assert_eq!(Object::Primitive(Integer(-1)), result.unwrap())
+    }
+
+    #[test]
+    fn plus() {
+        // FIXME: Add capacity of work with (), e.g: +(-1)
+        let mut parser_ast = parse_program(r#"1"#);
+        let interpreter = Interpreter::init();
+        let result = interpreter.eval(parser_ast.unwrap());
+        assert_eq!(Object::Primitive(Integer(1)), result.unwrap())
     }
 }
