@@ -116,7 +116,7 @@ impl Parser {
                         b: Box::new(self.factor().unwrap()),
                     });
                 }
-                Token::Plus | Token::Minus | Token::Slash | Token::Star => {
+                Token::Plus | Token::Minus | Token::Slash | Token::Star | Token::Percent => {
                     self.advance();
                     if let Some(possible_factor) = a {
                         a = Some(ast::Expression::BinOp {
@@ -473,6 +473,26 @@ mod tests {
                             value: Number::Integer { value: 1 }
                         }),
                         op: Operator::Add,
+                        b: Box::new(ast::Expression::Num {
+                            value: Number::Integer { value: 5 }
+                        }),
+                    }
+                }
+            ]
+        }))
+    }
+
+    #[test]
+    fn bin_mod_operation() {
+        let parse_ast = parse_program(r#"1 % 5"#);
+        assert_eq!(parse_ast, Some(ast::Program {
+            statements: vec![
+                ast::Statement::Expr {
+                    expression: ast::Expression::BinOp {
+                        a: Box::new(ast::Expression::Num {
+                            value: Number::Integer { value: 1 }
+                        }),
+                        op: Operator::Mod,
                         b: Box::new(ast::Expression::Num {
                             value: Number::Integer { value: 5 }
                         }),

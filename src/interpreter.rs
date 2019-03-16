@@ -1,4 +1,4 @@
-use crate::ast::{Comparison, Expression, Program, BooleanOperation, UnaryOperation};
+use crate::ast::{Comparison, Expression, Program, BooleanOperation, UnaryOperation, Operator};
 use crate::ast::Statement;
 use crate::error::Error;
 use crate::error::Error::OtherError;
@@ -50,11 +50,18 @@ impl Interpreter {
 //                println!("args: {:?}", args);
 //                println!("keywords: {:?}", keywords);
 //            }
-//            Expression::BinOp { a, op, b } => {
-//                println!("value a: {:?}", a);
-//                println!("op: {:?}", op);
-//                println!("value b: {:?}", b);
-//            }
+            Expression::BinOp { a, op, b } => {
+                let a_obj = self.visit_expression(*a)?;
+                let b_obj = self.visit_expression(*b)?;
+                match op {
+                    Operator::Add => a_obj.add(&b_obj),
+                    Operator::Sub => a_obj.subtract(&b_obj),
+                    Operator::Mul => a_obj.multiply(&b_obj),
+                    Operator::Div => a_obj.real_divide(&b_obj),
+                    Operator::Mod => a_obj.module(&b_obj),
+                    _ => Err(Error::OtherError("Not Implemented yet!".into()))
+                }
+            }
             Expression::Compare { a, op, b } => {
                 let a_obj = self.visit_expression(*a)?;
                 let b_obj = self.visit_expression(*b)?;
@@ -221,5 +228,53 @@ mod unary_operation {
         let interpreter = Interpreter::init();
         let result = interpreter.eval(parser_ast.unwrap());
         assert_eq!(Object::Primitive(Integer(1)), result.unwrap())
+    }
+}
+
+#[cfg(test)]
+mod binary_operation {
+    use crate::interpreter::Interpreter;
+    use crate::object::Object;
+    use crate::parse::parse_program;
+    use crate::primitive::Primitive::{Boolean, Integer, Float};
+
+    #[test]
+    fn add() {
+        let mut parser_ast = parse_program(r#"9 + 3"#);
+        let interpreter = Interpreter::init();
+        let result = interpreter.eval(parser_ast.unwrap());
+        assert_eq!(Object::Primitive(Integer(12)), result.unwrap())
+    }
+
+    #[test]
+    fn sub() {
+        let mut parser_ast = parse_program(r#"9 - 3"#);
+        let interpreter = Interpreter::init();
+        let result = interpreter.eval(parser_ast.unwrap());
+        assert_eq!(Object::Primitive(Integer(6)), result.unwrap())
+    }
+
+    #[test]
+    fn mul() {
+        let mut parser_ast = parse_program(r#"9 * 3"#);
+        let interpreter = Interpreter::init();
+        let result = interpreter.eval(parser_ast.unwrap());
+        assert_eq!(Object::Primitive(Integer(27)), result.unwrap())
+    }
+
+    #[test]
+    fn div() {
+        let mut parser_ast = parse_program(r#"9 / 3"#);
+        let interpreter = Interpreter::init();
+        let result = interpreter.eval(parser_ast.unwrap());
+        assert_eq!(Object::Primitive(Float(3.0)), result.unwrap())
+    }
+
+    #[test]
+    fn module() {
+        let mut parser_ast = parse_program(r#"9 % 3"#);
+        let interpreter = Interpreter::init();
+        let result = interpreter.eval(parser_ast.unwrap());
+        assert_eq!(Object::Primitive(Integer(0)), result.unwrap())
     }
 }
