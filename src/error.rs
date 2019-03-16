@@ -33,5 +33,6 @@ pub enum OperatorError {
     Equal,
     NotEqual,
     Is,
-    NotIs
+    NotIs,
+    Module,
 }
