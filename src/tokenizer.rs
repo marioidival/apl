@@ -181,7 +181,7 @@ impl<'a> Tokenizer<'a> {
             "entrada" => Some(Token::Entrada),
             "se" => Some(Token::Se),
             "senao" => Some(Token::SeNao),
-            "outentaose" => Some(Token::OuEntaoSe),
+            "ouentaose" => Some(Token::OuEntaoSe),
             "e" => Some(Token::E),
             "ou" => Some(Token::Ou),
             "nao" => Some(Token::Nao),
@@ -368,12 +368,15 @@ mod tests {
     }
 
     #[test]
-    fn test_scan_next_keywords_if_else_identifier() {
+    fn test_scan_next_keywords_conditional_identifiers() {
         let mut tokenizer = Tokenizer::init("se");
         assert_eq!(Some(Token::Se), tokenizer.scan_next());
 
         let mut tokenizer = Tokenizer::init("senao");
-        assert_eq!(Some(Token::SeNao), tokenizer.scan_next())
+        assert_eq!(Some(Token::SeNao), tokenizer.scan_next());
+
+        let mut tokenizer = Tokenizer::init("ouentaose");
+        assert_eq!(Some(Token::OuEntaoSe), tokenizer.scan_next());
     }
 
     #[test]
