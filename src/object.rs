@@ -4,14 +4,14 @@ use crate::ast::Number;
 
 type Result<T> = ::std::result::Result<T, Error>;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Object {
     Primitive(Primitive),
     Builtin(Builtin),
     Unit,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum Builtin {
     Print(fn(Object) -> Result<Object>),
     Input(fn() -> Result<Object>),

@@ -139,6 +139,7 @@ impl Parser {
                         b: Box::new(self.factor().unwrap()),
                     })
                 }
+                Token::Se => self.if_expression(),
                 Token::Nao => {
                     self.advance();
                     a = Some(ast::Expression::UnOp {
@@ -203,6 +204,19 @@ impl Parser {
         })
     }
 
+    fn if_expression(&mut self) -> Option<ast::Expression> {
+        self.expected(&Token::Se);
+        let test = self.expression().unwrap();
+        self.expected(&Token::Colon);
+        let body = self.statements().unwrap().unwrap();
+
+        Some(ast::Expression::IfExpression {
+            test: Box::new(test),
+            body: Box::new(body),
+            orelse: Box::new(),
+        })
+    }
+
     fn identifier(&mut self) -> Result<ast::Expression, ParseError> {
         match self.current() {
             Some(Token::Imprima) => {
@@ -240,8 +254,12 @@ impl Parser {
         self.tokens.peek()
     }
 
-    fn expected(&self) {
-        unimplemented!()
+    fn expected(&self, tok: &Token) -> Option<Token> {
+        let current = self.current().unwrap();
+        if &current == tok {
+            return Some(current);
+        }
+        None
     }
 }
 
@@ -543,6 +561,26 @@ mod tests {
     #[test]
     fn test_plus_unary_operation() {
         let parse_ast = parse_program(r#"+1"#);
+        assert_eq!(
+            parse_ast,
+            Some(ast::Program {
+                statements: vec![
+                    ast::Statement::Expr {
+                        expression: ast::Expression::UnOp {
+                            op: UnaryOperation::Plus,
+                            a: Box::new(ast::Expression::Num {
+                                value: Number::Integer { value: 1 }
+                            }),
+                        }
+                    }
+                ]
+            })
+        )
+    }
+
+    #[test]
+    fn if_expr() {
+        let parse_ast = parse_program(r#"se Verdadeiro"#);
         assert_eq!(
             parse_ast,
             Some(ast::Program {
