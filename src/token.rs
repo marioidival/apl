@@ -42,6 +42,8 @@ pub enum Token {
     Em,
     // is , [E0658]: non-ascii idents are not fully supported. (see issue #55467)
     Is,
+    // not is
+    NotIs,
     // assert
     Verifique,
     // break

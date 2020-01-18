@@ -1,7 +1,7 @@
 use itertools::{multipeek, MultiPeek};
 
-use std::str;
 use crate::token::Token;
+use std::str;
 
 #[derive(Debug)]
 pub struct Tokenizer<'a> {
@@ -37,13 +37,13 @@ impl<'a> Tokenizer<'a> {
         }
     }
 
-    fn advance_while(&mut self, condition: &Fn(char) -> bool) {
+    fn advance_while(&mut self, condition: &dyn Fn(char) -> bool) {
         while self.peek_check(condition) {
             self.advance();
         }
     }
 
-    fn peek_check(&mut self, check: &Fn(char) -> bool) -> bool {
+    fn peek_check(&mut self, check: &dyn Fn(char) -> bool) -> bool {
         self.source.reset_peek();
 
         match self.source.peek() {
@@ -52,7 +52,11 @@ impl<'a> Tokenizer<'a> {
         }
     }
 
-    fn peek_check_two(&mut self, cond1: &Fn(char) -> bool, cond2: &Fn(char) -> bool) -> bool {
+    fn peek_check_two(
+        &mut self,
+        cond1: &dyn Fn(char) -> bool,
+        cond2: &dyn Fn(char) -> bool,
+    ) -> bool {
         self.source.reset_peek();
 
         match self.source.peek() {
@@ -88,7 +92,7 @@ impl<'a> Tokenizer<'a> {
             '#' => {
                 self.advance_while(&|c| c != '\n');
                 Some(Token::Comment)
-            },
+            }
             '!' => {
                 if self.advance_if_match('=') {
                     Some(Token::BangEqual)
@@ -158,7 +162,7 @@ impl<'a> Tokenizer<'a> {
         let literal: String = self.current_lexeme.chars().skip(1).collect();
         // TODO: Return error!
         if !self.advance_if_match('"') {
-            return None
+            return None;
         }
         Some(Token::Texto(literal))
     }
@@ -199,11 +203,10 @@ impl<'a> Tokenizer<'a> {
             "provoque" => Some(Token::Provoque),
             "global" => Some(Token::Global),
             "em" => Some(Token::Em),
-            identifier => Some(Token::Identifier(identifier.into()))
+            identifier => Some(Token::Identifier(identifier.into())),
         }
     }
 }
-
 
 pub struct TokenizerIterator<'a> {
     tokenizer: Tokenizer<'a>,
@@ -217,7 +220,7 @@ impl<'a> Iterator for TokenizerIterator<'a> {
     }
 }
 
-fn tokenizer_into_iterator<'a>(source: &'a str) -> impl Iterator<Item=Token> + 'a {
+fn tokenizer_into_iterator<'a>(source: &'a str) -> impl Iterator<Item = Token> + 'a {
     TokenizerIterator {
         tokenizer: Tokenizer::init(source),
     }
@@ -228,8 +231,8 @@ pub(crate) fn scan(source: &str) -> Vec<Token> {
 
     for token in tokenizer_into_iterator(source) {
         match token {
-            Token::WhiteSpace | Token::Comment => {},
-            _ => tokens.push(token)
+            Token::WhiteSpace | Token::Comment => {}
+            _ => tokens.push(token),
         }
     }
 
@@ -309,9 +312,9 @@ mod tests {
     fn test_scan_next_float() {
         let mut tokenizer = Tokenizer::init("199.00");
         assert_eq!(Some(Token::Real(199.00)), tokenizer.scan_next());
-//        FIXME: I can have .199 float values
-//        let mut tokenizer = Tokenizer::init(".199");
-//        assert_eq!(Some(Token::Real(0.199)), tokenizer.scan_next())
+        //        FIXME: I can have .199 float values
+        //        let mut tokenizer = Tokenizer::init(".199");
+        //        assert_eq!(Some(Token::Real(0.199)), tokenizer.scan_next())
     }
 
     #[test]

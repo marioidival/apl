@@ -1,12 +1,12 @@
 use crate::ast;
-use crate::ast::{BooleanOperation, Comparison, Expression, Number, Operator, Statement, UnaryOperation};
+use crate::ast::{BooleanOperation, Comparison, Number, Operator, Statement, UnaryOperation};
 use crate::token::Token;
 use crate::tokenizer::scan;
 use crate::tokens::Tokens;
 
 #[derive(Debug)]
 pub enum ParseError {
-    Message(String)
+    Message(String),
 }
 
 /// It takes the list of tokens as input and create an AST as output.
@@ -35,7 +35,9 @@ impl Parser {
                 }
             }
         }
-        Some(ast::Program { statements: statements })
+        Some(ast::Program {
+            statements: statements,
+        })
     }
 
     fn statements(&mut self) -> Option<Result<Statement, ParseError>> {
@@ -44,9 +46,13 @@ impl Parser {
             Some(Token::Passe) => Some(Ok(ast::Statement::Pass)),
             Some(Token::Retorne) => {
                 if let Some(expr) = self.expression() {
-                    Some(Ok(ast::Statement::Return { value: Some(vec![expr]) }))
+                    Some(Ok(ast::Statement::Return {
+                        value: Some(vec![expr]),
+                    }))
                 } else {
-                    Some(Ok(ast::Statement::Return { value: Some(vec![]) }))
+                    Some(Ok(ast::Statement::Return {
+                        value: Some(vec![]),
+                    }))
                 }
             }
             Some(Token::Verifique) => {
@@ -67,8 +73,8 @@ impl Parser {
                         Some(Err(ParseError::Message("could not get assignment".into())))
                     }
                 }
-                _ => None
-            }
+                _ => None,
+            },
             Some(Token::Imprima) => {
                 if let Some(expression) = self.parse_print() {
                     Some(Ok(ast::Statement::Expr { expression }))
@@ -108,7 +114,13 @@ impl Parser {
         let mut a = self.factor();
         while let Some(token) = self.current() {
             match token {
-                Token::Less | Token::LessThan | Token::Greater | Token::GreaterThan | Token::BangEqual | Token::EqualEqual | Token::Is => {
+                Token::Less
+                | Token::LessThan
+                | Token::Greater
+                | Token::GreaterThan
+                | Token::BangEqual
+                | Token::EqualEqual
+                | Token::Is => {
                     self.advance();
                     a = Some(ast::Expression::Compare {
                         a: Box::new(a.unwrap()),
@@ -139,7 +151,10 @@ impl Parser {
                         b: Box::new(self.factor().unwrap()),
                     })
                 }
-                Token::Se => self.if_expression(),
+                Token::Se => {
+                    self.advance();
+                    a = self.if_expression()
+                }
                 Token::Nao => {
                     self.advance();
                     a = Some(ast::Expression::UnOp {
@@ -160,13 +175,13 @@ impl Parser {
             Some(Token::Inteiro(value)) => {
                 let _ = self.advance();
                 Some(ast::Expression::Num {
-                    value: Number::Integer { value }
+                    value: Number::Integer { value },
                 })
             }
             Some(Token::Real(value)) => {
                 let _ = self.advance();
                 Some(ast::Expression::Num {
-                    value: Number::Float { value }
+                    value: Number::Float { value },
                 })
             }
             Some(Token::Texto(value)) => {
@@ -175,7 +190,11 @@ impl Parser {
             }
             Some(Token::Logico(value)) => {
                 let _ = self.advance();
-                Some(if value { ast::Expression::True } else { ast::Expression::False })
+                Some(if value {
+                    ast::Expression::True
+                } else {
+                    ast::Expression::False
+                })
             }
             _ => None,
         }
@@ -208,12 +227,18 @@ impl Parser {
         self.expected(&Token::Se);
         let test = self.expression().unwrap();
         self.expected(&Token::Colon);
-        let body = self.statements().unwrap().unwrap();
+        self.advance();
+        let body = self.expression().unwrap();
+        let mut orelse = ast::Expression::None;
+        if self.consume(&Token::SeNao) {
+            self.advance();
+            orelse = self.expression().unwrap();
+        }
 
         Some(ast::Expression::IfExpression {
             test: Box::new(test),
             body: Box::new(body),
-            orelse: Box::new(),
+            orelse: Box::new(orelse),
         })
     }
 
@@ -221,11 +246,15 @@ impl Parser {
         match self.current() {
             Some(Token::Imprima) => {
                 let _ = self.advance();
-                Ok(ast::Expression::Identifier { name: String::from("imprima") })
+                Ok(ast::Expression::Identifier {
+                    name: String::from("imprima"),
+                })
             }
             Some(Token::Identifier(name)) => {
                 let _ = self.advance();
-                Ok(ast::Expression::Identifier { name: String::from(name) })
+                Ok(ast::Expression::Identifier {
+                    name: String::from(name),
+                })
             }
             _ => Err(ParseError::Message("identifier not found".into())),
         }
@@ -237,7 +266,7 @@ impl Parser {
                 self.advance();
                 true
             }
-            _ => false
+            _ => false,
         }
     }
 
@@ -263,7 +292,6 @@ impl Parser {
     }
 }
 
-
 pub fn parse_program(source: &str) -> Option<ast::Program> {
     let tokens = scan(source);
     let mut parser = Parser::init(tokens);
@@ -288,108 +316,159 @@ mod tests {
     fn test_hello_world() {
         let parse_ast = parse_program(r#"imprima("Olá mundo!")"#);
 
-        assert_eq!(parse_ast, Some(ast::Program {
-            statements: vec![ast::Statement::Expr {
-                expression: ast::Expression::Call {
-                    function: Box::new(ast::Expression::Identifier { name: String::from("imprima") }),
-                    args: vec![ast::Expression::Str { value: String::from("Olá mundo!") }],
-                    keywords: vec![],
-                }
-            }]
-        }))
+        assert_eq!(
+            parse_ast,
+            Some(ast::Program {
+                statements: vec![ast::Statement::Expr {
+                    expression: ast::Expression::Call {
+                        function: Box::new(ast::Expression::Identifier {
+                            name: String::from("imprima")
+                        }),
+                        args: vec![ast::Expression::Str {
+                            value: String::from("Olá mundo!")
+                        }],
+                        keywords: vec![],
+                    }
+                }]
+            })
+        )
     }
 
     #[test]
     fn test_two_hello_world() {
-        let parse_ast = parse_program(r#"
+        let parse_ast = parse_program(
+            r#"
             imprima("Olá mundo!")
             imprima("Olá pequeno gafanhoto!")
-        "#);
+        "#,
+        );
 
-        assert_eq!(parse_ast, Some(ast::Program {
-            statements: vec![
-                ast::Statement::Expr {
-                    expression: ast::Expression::Call {
-                        function: Box::new(ast::Expression::Identifier { name: String::from("imprima") }),
-                        args: vec![ast::Expression::Str { value: String::from("Olá mundo!") }],
-                        keywords: vec![],
+        assert_eq!(
+            parse_ast,
+            Some(ast::Program {
+                statements: vec![
+                    ast::Statement::Expr {
+                        expression: ast::Expression::Call {
+                            function: Box::new(ast::Expression::Identifier {
+                                name: String::from("imprima")
+                            }),
+                            args: vec![ast::Expression::Str {
+                                value: String::from("Olá mundo!")
+                            }],
+                            keywords: vec![],
+                        }
+                    },
+                    ast::Statement::Expr {
+                        expression: ast::Expression::Call {
+                            function: Box::new(ast::Expression::Identifier {
+                                name: String::from("imprima")
+                            }),
+                            args: vec![ast::Expression::Str {
+                                value: String::from("Olá pequeno gafanhoto!")
+                            }],
+                            keywords: vec![],
+                        }
                     }
-                },
-                ast::Statement::Expr {
-                    expression: ast::Expression::Call {
-                        function: Box::new(ast::Expression::Identifier { name: String::from("imprima") }),
-                        args: vec![ast::Expression::Str { value: String::from("Olá pequeno gafanhoto!") }],
-                        keywords: vec![],
-                    }
-                }
-            ]
-        }))
+                ]
+            })
+        )
     }
 
     #[test]
     fn test_sum_in_print() {
         let parse_ast = parse_program(r#"imprima(5 + 3 - 2)"#);
 
-        assert_eq!(parse_ast, Some(ast::Program {
-            statements: vec![
-                ast::Statement::Expr {
+        assert_eq!(
+            parse_ast,
+            Some(ast::Program {
+                statements: vec![ast::Statement::Expr {
                     expression: ast::Expression::Call {
-                        function: Box::new(ast::Expression::Identifier { name: String::from("imprima") }),
+                        function: Box::new(ast::Expression::Identifier {
+                            name: String::from("imprima")
+                        }),
                         args: vec![ast::Expression::BinOp {
                             a: Box::new(ast::Expression::BinOp {
-                                a: Box::new(ast::Expression::Num { value: ast::Number::Integer { value: 5 } }),
+                                a: Box::new(ast::Expression::Num {
+                                    value: ast::Number::Integer { value: 5 }
+                                }),
                                 op: Operator::Add,
-                                b: Box::new(ast::Expression::Num { value: ast::Number::Integer { value: 3 } }),
+                                b: Box::new(ast::Expression::Num {
+                                    value: ast::Number::Integer { value: 3 }
+                                }),
                             }),
                             op: Operator::Sub,
-                            b: Box::new(ast::Expression::Num { value: ast::Number::Integer { value: 2 } }),
+                            b: Box::new(ast::Expression::Num {
+                                value: ast::Number::Integer { value: 2 }
+                            }),
                         }],
                         keywords: vec![],
                     }
-                }
-            ]
-        }))
+                }]
+            })
+        )
     }
 
     #[test]
     fn test_assign_int_variable() {
         let parse_ast = parse_program(r#"numero = 10"#);
-        assert_eq!(parse_ast, Some(ast::Program {
-            statements: vec![ast::Statement::Assign {
-                targets: vec![ast::Expression::Identifier { name: "numero".into() }],
-                value: ast::Expression::Num { value: Number::Integer { value: 10 } },
-            }]
-        }))
+        assert_eq!(
+            parse_ast,
+            Some(ast::Program {
+                statements: vec![ast::Statement::Assign {
+                    targets: vec![ast::Expression::Identifier {
+                        name: "numero".into()
+                    }],
+                    value: ast::Expression::Num {
+                        value: Number::Integer { value: 10 }
+                    },
+                }]
+            })
+        )
     }
 
     #[test]
     fn test_assign_float_variable() {
         let parse_ast = parse_program(r#"real = 10.0"#);
-        assert_eq!(parse_ast, Some(ast::Program {
-            statements: vec![ast::Statement::Assign {
-                targets: vec![ast::Expression::Identifier { name: "real".into() }],
-                value: ast::Expression::Num { value: Number::Float { value: 10.0 } },
-            }]
-        }))
+        assert_eq!(
+            parse_ast,
+            Some(ast::Program {
+                statements: vec![ast::Statement::Assign {
+                    targets: vec![ast::Expression::Identifier {
+                        name: "real".into()
+                    }],
+                    value: ast::Expression::Num {
+                        value: Number::Float { value: 10.0 }
+                    },
+                }]
+            })
+        )
     }
 
     #[test]
     fn test_assign_string_variable() {
         let parse_ast = parse_program(r#"nome = "coral""#);
-        assert_eq!(parse_ast, Some(ast::Program {
-            statements: vec![ast::Statement::Assign {
-                targets: vec![ast::Expression::Identifier { name: "nome".into() }],
-                value: ast::Expression::Str { value: "coral".into() },
-            }]
-        }))
+        assert_eq!(
+            parse_ast,
+            Some(ast::Program {
+                statements: vec![ast::Statement::Assign {
+                    targets: vec![ast::Expression::Identifier {
+                        name: "nome".into()
+                    }],
+                    value: ast::Expression::Str {
+                        value: "coral".into()
+                    },
+                }]
+            })
+        )
     }
 
     #[test]
     fn test_comparision_less() {
         let parse_ast = parse_program(r#"1 < 5"#);
-        assert_eq!(parse_ast, Some(ast::Program {
-            statements: vec![
-                ast::Statement::Expr {
+        assert_eq!(
+            parse_ast,
+            Some(ast::Program {
+                statements: vec![ast::Statement::Expr {
                     expression: ast::Expression::Compare {
                         a: Box::new(ast::Expression::Num {
                             value: Number::Integer { value: 1 }
@@ -399,17 +478,18 @@ mod tests {
                             value: Number::Integer { value: 5 }
                         }),
                     }
-                }
-            ]
-        }))
+                }]
+            })
+        )
     }
 
     #[test]
     fn test_comparision_is() {
         let parse_ast = parse_program(r#"1 é 5"#);
-        assert_eq!(parse_ast, Some(ast::Program {
-            statements: vec![
-                ast::Statement::Expr {
+        assert_eq!(
+            parse_ast,
+            Some(ast::Program {
+                statements: vec![ast::Statement::Expr {
                     expression: ast::Expression::Compare {
                         a: Box::new(ast::Expression::Num {
                             value: Number::Integer { value: 1 }
@@ -419,17 +499,18 @@ mod tests {
                             value: Number::Integer { value: 5 }
                         }),
                     }
-                }
-            ]
-        }))
+                }]
+            })
+        )
     }
 
     #[test]
     fn test_comparision_less_than() {
         let parse_ast = parse_program(r#"1 <= 5"#);
-        assert_eq!(parse_ast, Some(ast::Program {
-            statements: vec![
-                ast::Statement::Expr {
+        assert_eq!(
+            parse_ast,
+            Some(ast::Program {
+                statements: vec![ast::Statement::Expr {
                     expression: ast::Expression::Compare {
                         a: Box::new(ast::Expression::Num {
                             value: Number::Integer { value: 1 }
@@ -439,17 +520,18 @@ mod tests {
                             value: Number::Integer { value: 5 }
                         }),
                     }
-                }
-            ]
-        }))
+                }]
+            })
+        )
     }
 
     #[test]
     fn test_comparision_equal_equal() {
         let parse_ast = parse_program(r#"1 == 1"#);
-        assert_eq!(parse_ast, Some(ast::Program {
-            statements: vec![
-                ast::Statement::Expr {
+        assert_eq!(
+            parse_ast,
+            Some(ast::Program {
+                statements: vec![ast::Statement::Expr {
                     expression: ast::Expression::Compare {
                         a: Box::new(ast::Expression::Num {
                             value: Number::Integer { value: 1 }
@@ -459,33 +541,35 @@ mod tests {
                             value: Number::Integer { value: 1 }
                         }),
                     }
-                }
-            ]
-        }))
+                }]
+            })
+        )
     }
 
     #[test]
     fn test_bin_or_comparision() {
         let parse_ast = parse_program(r#"Verdadeiro ou Falso"#);
-        assert_eq!(parse_ast, Some(ast::Program {
-            statements: vec![
-                ast::Statement::Expr {
+        assert_eq!(
+            parse_ast,
+            Some(ast::Program {
+                statements: vec![ast::Statement::Expr {
                     expression: ast::Expression::BoolOp {
                         a: Box::new(ast::Expression::True),
                         op: BooleanOperation::Or,
                         b: Box::new(ast::Expression::False),
                     }
-                }
-            ]
-        }))
+                }]
+            })
+        )
     }
 
     #[test]
     fn test_bin_sum_operation() {
         let parse_ast = parse_program(r#"1 + 5"#);
-        assert_eq!(parse_ast, Some(ast::Program {
-            statements: vec![
-                ast::Statement::Expr {
+        assert_eq!(
+            parse_ast,
+            Some(ast::Program {
+                statements: vec![ast::Statement::Expr {
                     expression: ast::Expression::BinOp {
                         a: Box::new(ast::Expression::Num {
                             value: Number::Integer { value: 1 }
@@ -495,17 +579,18 @@ mod tests {
                             value: Number::Integer { value: 5 }
                         }),
                     }
-                }
-            ]
-        }))
+                }]
+            })
+        )
     }
 
     #[test]
     fn bin_mod_operation() {
         let parse_ast = parse_program(r#"1 % 5"#);
-        assert_eq!(parse_ast, Some(ast::Program {
-            statements: vec![
-                ast::Statement::Expr {
+        assert_eq!(
+            parse_ast,
+            Some(ast::Program {
+                statements: vec![ast::Statement::Expr {
                     expression: ast::Expression::BinOp {
                         a: Box::new(ast::Expression::Num {
                             value: Number::Integer { value: 1 }
@@ -515,9 +600,9 @@ mod tests {
                             value: Number::Integer { value: 5 }
                         }),
                     }
-                }
-            ]
-        }))
+                }]
+            })
+        )
     }
 
     #[test]
@@ -526,14 +611,12 @@ mod tests {
         assert_eq!(
             parse_ast,
             Some(ast::Program {
-                statements: vec![
-                    ast::Statement::Expr {
-                        expression: ast::Expression::UnOp {
-                            op: UnaryOperation::Not,
-                            a: Box::new(ast::Expression::False),
-                        }
+                statements: vec![ast::Statement::Expr {
+                    expression: ast::Expression::UnOp {
+                        op: UnaryOperation::Not,
+                        a: Box::new(ast::Expression::False),
                     }
-                ]
+                }]
             })
         )
     }
@@ -544,16 +627,14 @@ mod tests {
         assert_eq!(
             parse_ast,
             Some(ast::Program {
-                statements: vec![
-                    ast::Statement::Expr {
-                        expression: ast::Expression::UnOp {
-                            op: UnaryOperation::Minus,
-                            a: Box::new(ast::Expression::Num {
-                                value: Number::Integer { value: 1 }
-                            }),
-                        }
+                statements: vec![ast::Statement::Expr {
+                    expression: ast::Expression::UnOp {
+                        op: UnaryOperation::Minus,
+                        a: Box::new(ast::Expression::Num {
+                            value: Number::Integer { value: 1 }
+                        }),
                     }
-                ]
+                }]
             })
         )
     }
@@ -564,36 +645,14 @@ mod tests {
         assert_eq!(
             parse_ast,
             Some(ast::Program {
-                statements: vec![
-                    ast::Statement::Expr {
-                        expression: ast::Expression::UnOp {
-                            op: UnaryOperation::Plus,
-                            a: Box::new(ast::Expression::Num {
-                                value: Number::Integer { value: 1 }
-                            }),
-                        }
+                statements: vec![ast::Statement::Expr {
+                    expression: ast::Expression::UnOp {
+                        op: UnaryOperation::Plus,
+                        a: Box::new(ast::Expression::Num {
+                            value: Number::Integer { value: 1 }
+                        }),
                     }
-                ]
-            })
-        )
-    }
-
-    #[test]
-    fn if_expr() {
-        let parse_ast = parse_program(r#"se Verdadeiro"#);
-        assert_eq!(
-            parse_ast,
-            Some(ast::Program {
-                statements: vec![
-                    ast::Statement::Expr {
-                        expression: ast::Expression::UnOp {
-                            op: UnaryOperation::Plus,
-                            a: Box::new(ast::Expression::Num {
-                                value: Number::Integer { value: 1 }
-                            }),
-                        }
-                    }
-                ]
+                }]
             })
         )
     }

@@ -1,6 +1,6 @@
+use self::Primitive::*;
 use crate::error::Error;
 use crate::error::OperatorError;
-use self::Primitive::*;
 
 type Result<T> = ::std::result::Result<T, Error>;
 
@@ -40,7 +40,7 @@ impl Primitive {
     pub fn negate(&self) -> Result<Self> {
         match self {
             Boolean(i) => Ok(Boolean(!*i)),
-            left => Self::error(left, None, OperatorError::Negate)
+            left => Self::error(left, None, OperatorError::Negate),
         }
     }
 
@@ -48,7 +48,7 @@ impl Primitive {
         match self {
             Integer(v) => Ok(Integer(-*v)),
             Float(v) => Ok(Float(-*v)),
-            l => Self::error(l, None, OperatorError::UnarySub)
+            l => Self::error(l, None, OperatorError::UnarySub),
         }
     }
 
@@ -56,15 +56,14 @@ impl Primitive {
         match self {
             Integer(v) => Ok(Integer((-1 * *v))),
             Float(v) => Ok(Float((-1.0 * *v))),
-            l => Self::error(l, None, OperatorError::UnaryPlus)
+            l => Self::error(l, None, OperatorError::UnaryPlus),
         }
     }
-
 
     pub fn and(&self, other: &Self) -> Result<Self> {
         let res = match (self, other) {
             (Boolean(left), Boolean(right)) => (*left && *right).into(),
-            (left, right) => Self::error(left, Some(right), OperatorError::Add)?
+            (left, right) => Self::error(left, Some(right), OperatorError::Add)?,
         };
         Ok(res)
     }
@@ -72,7 +71,7 @@ impl Primitive {
     pub fn or(&self, other: &Self) -> Result<Self> {
         let res = match (self, other) {
             (Boolean(left), Boolean(right)) => (*left || *right).into(),
-            (left, right) => Self::error(left, Some(right), OperatorError::Or)?
+            (left, right) => Self::error(left, Some(right), OperatorError::Or)?,
         };
         Ok(res)
     }
@@ -84,7 +83,7 @@ impl Primitive {
             (Float(left), Float(right)) => (*left == *right).into(),
             (Float(left), Integer(right)) => (*left == (*right as f64)).into(),
             (Integer(left), Float(right)) => ((*left as f64) == *right).into(),
-            (left, right) => Self::error(left, Some(right), OperatorError::Equal)?
+            (left, right) => Self::error(left, Some(right), OperatorError::Equal)?,
         };
         Ok(res)
     }
@@ -96,7 +95,7 @@ impl Primitive {
             (Float(left), Float(right)) => (*left != *right).into(),
             (Float(left), Integer(right)) => (*left != (*right as f64)).into(),
             (Integer(left), Float(right)) => ((*left as f64) != *right).into(),
-            (left, right) => Self::error(left, Some(right), OperatorError::NotEqual)?
+            (left, right) => Self::error(left, Some(right), OperatorError::NotEqual)?,
         };
         Ok(res)
     }
@@ -107,7 +106,7 @@ impl Primitive {
             (Float(left), Float(right)) => (*left < *right).into(),
             (Float(left), Integer(right)) => (*left < (*right as f64)).into(),
             (Integer(left), Float(right)) => ((*left as f64) < *right).into(),
-            (left, right) => Self::error(left, Some(right), OperatorError::LessThan)?
+            (left, right) => Self::error(left, Some(right), OperatorError::LessThan)?,
         };
         Ok(res)
     }
@@ -118,7 +117,7 @@ impl Primitive {
             (Float(left), Float(right)) => (*left <= *right).into(),
             (Float(left), Integer(right)) => (*left <= (*right as f64)).into(),
             (Integer(left), Float(right)) => ((*left as f64) <= *right).into(),
-            (left, right) => Self::error(left, Some(right), OperatorError::LessThanEqual)?
+            (left, right) => Self::error(left, Some(right), OperatorError::LessThanEqual)?,
         };
         Ok(res)
     }
@@ -129,7 +128,7 @@ impl Primitive {
             (Float(left), Float(right)) => (*left > *right).into(),
             (Float(left), Integer(right)) => (*left > (*right as f64)).into(),
             (Integer(left), Float(right)) => ((*left as f64) > *right).into(),
-            (left, right) => Self::error(left, Some(right), OperatorError::GreaterThan)?
+            (left, right) => Self::error(left, Some(right), OperatorError::GreaterThan)?,
         };
         Ok(res)
     }
@@ -140,7 +139,7 @@ impl Primitive {
             (Float(left), Float(right)) => (*left >= *right).into(),
             (Float(left), Integer(right)) => (*left >= (*right as f64)).into(),
             (Integer(left), Float(right)) => ((*left as f64) >= *right).into(),
-            (left, right) => Self::error(left, Some(right), OperatorError::GreaterThanEqual)?
+            (left, right) => Self::error(left, Some(right), OperatorError::GreaterThanEqual)?,
         };
         Ok(res)
     }
@@ -579,7 +578,6 @@ mod tests {
         let a = Primitive::Integer(10);
         assert_eq!(Primitive::Integer(-10), a.minus().unwrap())
     }
-
 
     #[test]
     fn unary_plus() {

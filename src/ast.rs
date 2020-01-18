@@ -1,7 +1,3 @@
-use crate::ast::Comparison::In;
-use crate::ast::Expression::{BoolOp, Compare};
-use crate::error::{Error, OperatorError};
-use crate::primitive::{Primitive, Primitive::*};
 use crate::token::Token;
 
 #[derive(Debug, PartialEq)]
@@ -17,7 +13,7 @@ impl From<Token> for UnaryOperation {
             Token::Nao => UnaryOperation::Not,
             Token::Minus => UnaryOperation::Minus,
             Token::Plus => UnaryOperation::Plus,
-            _ => panic!("ins't token for unary operation!")
+            _ => panic!("ins't token for unary operation!"),
         }
     }
 }
@@ -33,7 +29,7 @@ impl From<Token> for BooleanOperation {
         match tk {
             Token::E => BooleanOperation::And,
             Token::Ou => BooleanOperation::Or,
-            _ => panic!("ins't token for boolean operation!")
+            _ => panic!("ins't token for boolean operation!"),
         }
     }
 }
@@ -55,7 +51,7 @@ impl From<Token> for Operator {
             Token::Slash => Operator::Div,
             Token::Star => Operator::Mul,
             Token::Percent => Operator::Mod,
-            _ => panic!("unit type isn't a real type")
+            _ => panic!("unit type isn't a real type"),
         }
     }
 }
@@ -71,7 +67,6 @@ pub enum Comparison {
     In,
     NotIn,
     Is,
-    NotIs,
 }
 
 impl From<Token> for Comparison {
@@ -84,7 +79,7 @@ impl From<Token> for Comparison {
             Token::EqualEqual => Comparison::Equal,
             Token::BangEqual => Comparison::NotEqual,
             Token::Is => Comparison::Is,
-            _ => panic!("unit type isn't a real type")
+            _ => panic!("unit type isn't a real type"),
         }
     }
 }
@@ -148,20 +143,19 @@ pub enum Expression {
 
 #[derive(Debug, PartialEq)]
 pub enum Statement {
-//    FunctionDef,
-//    ClassDef,
-//    Delete {},
-//    For,
-//    While,
-//    If,
-//    Raise,
-//    Try,
-
+    //    FunctionDef,
+    //    ClassDef,
+    //    Delete {},
+    //    For,
+    //    While,
+    //    If,
+    //    Raise,
+    //    Try,
     Break,
     Continue,
     Pass,
     Return {
-        value: Option<Vec<Expression>>
+        value: Option<Vec<Expression>>,
     },
     Assert {
         test: Expression,

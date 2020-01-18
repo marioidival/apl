@@ -1,10 +1,9 @@
-use crate::ast::{BooleanOperation, Comparison, Expression, Operator, Program, UnaryOperation, Keyword};
 use crate::ast::Statement;
+use crate::ast::{BooleanOperation, Comparison, Expression, Operator, Program, UnaryOperation};
 use crate::error::Error;
 use crate::error::Error::OtherError;
 use crate::object::Object;
 use crate::primitive::Primitive;
-use itertools::Itertools;
 
 type Result<T> = ::std::result::Result<T, Error>;
 
@@ -34,7 +33,7 @@ impl Interpreter {
     fn visit_statement(&self, statement: Statement) -> Result<Object> {
         match statement {
             Statement::Expr { expression } => self.visit_expression(expression),
-            _ => Err(Error::OtherError("statement not implemented yet".into()))
+            _ => Err(Error::OtherError("statement not implemented yet".into())),
         }
     }
 
@@ -42,16 +41,12 @@ impl Interpreter {
         match expression {
             Expression::IfExpression { test, body, orelse } => {
                 match self.visit_expression(*test)? {
-                    Object::Primitive(Primitive::Boolean(true)) => { ;
-                        self.visit_expression(*body)
-                    },
-                    Object::Primitive(Primitive::Boolean(false))=> {
-                        self.visit_expression(*orelse)
-                    }
-                    _ => Err(OtherError("should be true or false".into()))
+                    Object::Primitive(Primitive::Boolean(true)) => self.visit_expression(*body),
+                    Object::Primitive(Primitive::Boolean(false)) => self.visit_expression(*orelse),
+                    _ => Err(OtherError("should be true or false".into())),
                 }
             }
-//            Expression::Call { function, args, keywords } => {}
+            //            Expression::Call { function, args, keywords } => {}
             Expression::BinOp { a, op, b } => {
                 let a_obj = self.visit_expression(*a)?;
                 let b_obj = self.visit_expression(*b)?;
@@ -74,7 +69,7 @@ impl Interpreter {
                     Comparison::GreaterThan => a_obj.greater_than_equal(&b_obj),
                     Comparison::LessThan => a_obj.less_than_equal(&b_obj),
                     Comparison::Is => a_obj.is(&b_obj),
-                    _ => Err(Error::OtherError("comparison not implemented yet".into()))
+                    _ => Err(Error::OtherError("comparison not implemented yet".into())),
                 }
             }
             Expression::BoolOp { a, op, b } => {
@@ -93,22 +88,17 @@ impl Interpreter {
                     UnaryOperation::Plus => a_obj.unary_plus(),
                 }
             }
-            Expression::Str { value } => {
-                Ok(value.into())
-            }
-            Expression::Num { value } => {
-                Ok(value.into())
-            }
+            Expression::Str { value } => Ok(value.into()),
+            Expression::Num { value } => Ok(value.into()),
             Expression::True => Ok(true.into()),
             Expression::False => Ok(false.into()),
-//            Expression::Identifier { name } => {
-//                println!("identifier: {:?}", name);
-//            }
-            _ => Err(Error::OtherError("expression not implemented yet".into()))
+            //            Expression::Identifier { name } => {
+            //                println!("identifier: {:?}", name);
+            //            }
+            _ => Err(Error::OtherError("expression not implemented yet".into())),
         }
     }
 }
-
 
 #[cfg(test)]
 mod comparison {
@@ -188,7 +178,6 @@ mod bool_operation {
         let result = interpreter.eval(parser_ast.unwrap());
         assert_eq!(Object::Primitive(Boolean(true)), result.unwrap())
     }
-
 
     #[test]
     fn or() {
@@ -285,13 +274,29 @@ mod ifexpression {
     use crate::interpreter::Interpreter;
     use crate::object::Object;
     use crate::parse::parse_program;
-    use crate::primitive::Primitive::Boolean;
+    use crate::primitive::Primitive::{Boolean, Integer};
 
     #[test]
-    fn if_expression() {
+    fn if_condition_true() {
+        let parser_ast = parse_program(r#"se 1 > 0: Verdadeiro"#);
+        let interpreter = Interpreter::init();
+        let result = interpreter.eval(parser_ast.unwrap());
+        assert_eq!(Object::Primitive(Boolean(true)), result.unwrap());
+    }
+
+    #[test]
+    fn if_condition_false() {
         let parser_ast = parse_program(r#"se 1 < 0: 1 + 1 senao: 1 - 1"#);
         let interpreter = Interpreter::init();
         let result = interpreter.eval(parser_ast.unwrap());
-        assert_eq!(Object::Primitive(Boolean(true)), result.unwrap())
+        assert_eq!(Object::Primitive(Integer(0)), result.unwrap());
+    }
+
+    #[test]
+    fn if_multi_condition() {
+        let parser_ast = parse_program(r#"se 1 < 0: 1 + 1 senao: se Verdadeiro: 5 - 1"#);
+        let interpreter = Interpreter::init();
+        let result = interpreter.eval(parser_ast.unwrap());
+        assert_eq!(Object::Primitive(Integer(4)), result.unwrap());
     }
 }

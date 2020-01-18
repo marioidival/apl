@@ -1,6 +1,6 @@
+use crate::ast::Number;
 use crate::error::{Error, OperatorError};
 use crate::primitive::Primitive;
-use crate::ast::Number;
 
 type Result<T> = ::std::result::Result<T, Error>;
 
@@ -45,7 +45,7 @@ impl From<Number> for Object {
     fn from(s: Number) -> Self {
         match s {
             Number::Integer { value } => Object::Primitive(Primitive::Integer(value)),
-            Number::Float { value } => Object::Primitive(Primitive::Float(value))
+            Number::Float { value } => Object::Primitive(Primitive::Float(value)),
         }
     }
 }
@@ -81,7 +81,7 @@ impl Object {
     pub fn add(&self, other: &Self) -> Result<Self> {
         match (self, other) {
             (Object::Primitive(l), Object::Primitive(r)) => Ok(l.add(r)?.into()),
-            (_, r) => self.error(Some(r), OperatorError::Add)
+            (_, r) => self.error(Some(r), OperatorError::Add),
         }
     }
 
@@ -194,7 +194,10 @@ mod tests {
     #[test]
     fn negate() {
         let truth = Object::Primitive(Primitive::Boolean(true));
-        assert_eq!(Object::Primitive(Primitive::Boolean(false)), truth.negate().unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(false)),
+            truth.negate().unwrap()
+        )
     }
 
     #[test]
@@ -202,7 +205,10 @@ mod tests {
         let truth = Object::Primitive(Primitive::Boolean(true));
         let falsy = Object::Primitive(Primitive::Boolean(false));
 
-        assert_eq!(Object::Primitive(Primitive::Boolean(false)), truth.and(&falsy).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(false)),
+            truth.and(&falsy).unwrap()
+        )
     }
 
     #[test]
@@ -210,7 +216,10 @@ mod tests {
         let truth = Object::Primitive(Primitive::Boolean(true));
         let falsy = Object::Primitive(Primitive::Boolean(false));
 
-        assert_eq!(Object::Primitive(Primitive::Boolean(true)), truth.or(&falsy).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(true)),
+            truth.or(&falsy).unwrap()
+        )
     }
 
     #[test]
@@ -218,7 +227,10 @@ mod tests {
         let truth = Object::Primitive(Primitive::Boolean(true));
         let falsy = Object::Primitive(Primitive::Boolean(false));
 
-        assert_eq!(Object::Primitive(Primitive::Boolean(false)), truth.equal(&falsy).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(false)),
+            truth.equal(&falsy).unwrap()
+        )
     }
 
     #[test]
@@ -226,7 +238,10 @@ mod tests {
         let a = Object::Primitive(Primitive::Integer(1));
         let b = Object::Primitive(Primitive::Integer(1));
 
-        assert_eq!(Object::Primitive(Primitive::Boolean(true)), a.equal(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(true)),
+            a.equal(&b).unwrap()
+        )
     }
 
     #[test]
@@ -234,7 +249,10 @@ mod tests {
         let a = Object::Primitive(Primitive::Float(1.2));
         let b = Object::Primitive(Primitive::Float(1.2));
 
-        assert_eq!(Object::Primitive(Primitive::Boolean(true)), a.equal(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(true)),
+            a.equal(&b).unwrap()
+        )
     }
 
     #[test]
@@ -242,7 +260,10 @@ mod tests {
         let a = Object::Primitive(Primitive::Integer(1));
         let b = Object::Primitive(Primitive::Float(1.0));
 
-        assert_eq!(Object::Primitive(Primitive::Boolean(true)), a.equal(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(true)),
+            a.equal(&b).unwrap()
+        )
     }
 
     #[test]
@@ -250,7 +271,10 @@ mod tests {
         let a = Object::Primitive(Primitive::Float(1.0));
         let b = Object::Primitive(Primitive::Integer(1));
 
-        assert_eq!(Object::Primitive(Primitive::Boolean(true)), a.equal(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(true)),
+            a.equal(&b).unwrap()
+        )
     }
 
     #[test]
@@ -258,7 +282,10 @@ mod tests {
         let truth = Object::Primitive(Primitive::Boolean(true));
         let falsy = Object::Primitive(Primitive::Boolean(false));
 
-        assert_eq!(Object::Primitive(Primitive::Boolean(true)), truth.not_equal(&falsy).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(true)),
+            truth.not_equal(&falsy).unwrap()
+        )
     }
 
     #[test]
@@ -266,7 +293,10 @@ mod tests {
         let a = Object::Primitive(Primitive::Integer(1));
         let b = Object::Primitive(Primitive::Integer(1));
 
-        assert_eq!(Object::Primitive(Primitive::Boolean(false)), a.not_equal(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(false)),
+            a.not_equal(&b).unwrap()
+        )
     }
 
     #[test]
@@ -274,7 +304,10 @@ mod tests {
         let a = Object::Primitive(Primitive::Float(1.2));
         let b = Object::Primitive(Primitive::Float(1.2));
 
-        assert_eq!(Object::Primitive(Primitive::Boolean(false)), a.not_equal(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(false)),
+            a.not_equal(&b).unwrap()
+        )
     }
 
     #[test]
@@ -282,7 +315,10 @@ mod tests {
         let a = Object::Primitive(Primitive::Integer(1));
         let b = Object::Primitive(Primitive::Float(1.0));
 
-        assert_eq!(Object::Primitive(Primitive::Boolean(false)), a.not_equal(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(false)),
+            a.not_equal(&b).unwrap()
+        )
     }
 
     #[test]
@@ -290,119 +326,170 @@ mod tests {
         let a = Object::Primitive(Primitive::Float(1.0));
         let b = Object::Primitive(Primitive::Integer(1));
 
-        assert_eq!(Object::Primitive(Primitive::Boolean(false)), a.not_equal(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(false)),
+            a.not_equal(&b).unwrap()
+        )
     }
 
     #[test]
     fn less_int() {
         let a = Object::Primitive(Primitive::Integer(1));
         let b = Object::Primitive(Primitive::Integer(1));
-        assert_eq!(Object::Primitive(Primitive::Boolean(false)), a.less_than(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(false)),
+            a.less_than(&b).unwrap()
+        )
     }
 
     #[test]
     fn less_float() {
         let a = Object::Primitive(Primitive::Float(1.2));
         let b = Object::Primitive(Primitive::Float(1.2));
-        assert_eq!(Object::Primitive(Primitive::Boolean(false)), a.less_than(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(false)),
+            a.less_than(&b).unwrap()
+        )
     }
 
     #[test]
     fn less_int_float() {
         let a = Object::Primitive(Primitive::Integer(1));
         let b = Object::Primitive(Primitive::Float(1.0));
-        assert_eq!(Object::Primitive(Primitive::Boolean(false)), a.less_than(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(false)),
+            a.less_than(&b).unwrap()
+        )
     }
 
     #[test]
     fn less_float_int() {
         let a = Object::Primitive(Primitive::Float(1.0));
         let b = Object::Primitive(Primitive::Integer(1));
-        assert_eq!(Object::Primitive(Primitive::Boolean(false)), a.less_than(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(false)),
+            a.less_than(&b).unwrap()
+        )
     }
 
     #[test]
     fn less_eq_int() {
         let a = Object::Primitive(Primitive::Integer(1));
         let b = Object::Primitive(Primitive::Integer(1));
-        assert_eq!(Object::Primitive(Primitive::Boolean(true)), a.less_than_equal(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(true)),
+            a.less_than_equal(&b).unwrap()
+        )
     }
 
     #[test]
     fn less_eq_float() {
         let a = Object::Primitive(Primitive::Float(1.2));
         let b = Object::Primitive(Primitive::Float(1.2));
-        assert_eq!(Object::Primitive(Primitive::Boolean(true)), a.less_than_equal(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(true)),
+            a.less_than_equal(&b).unwrap()
+        )
     }
 
     #[test]
     fn less_eq_int_float() {
         let a = Object::Primitive(Primitive::Integer(1));
         let b = Object::Primitive(Primitive::Float(1.0));
-        assert_eq!(Object::Primitive(Primitive::Boolean(true)), a.less_than_equal(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(true)),
+            a.less_than_equal(&b).unwrap()
+        )
     }
 
     #[test]
     fn less_eq_float_int() {
         let a = Object::Primitive(Primitive::Float(1.0));
         let b = Object::Primitive(Primitive::Integer(1));
-        assert_eq!(Object::Primitive(Primitive::Boolean(true)), a.less_than_equal(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(true)),
+            a.less_than_equal(&b).unwrap()
+        )
     }
 
     #[test]
     fn greater_int() {
         let a = Object::Primitive(Primitive::Integer(1));
         let b = Object::Primitive(Primitive::Integer(1));
-        assert_eq!(Object::Primitive(Primitive::Boolean(false)), a.greater_than(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(false)),
+            a.greater_than(&b).unwrap()
+        )
     }
 
     #[test]
     fn greater_float() {
         let a = Object::Primitive(Primitive::Float(1.2));
         let b = Object::Primitive(Primitive::Float(1.2));
-        assert_eq!(Object::Primitive(Primitive::Boolean(false)), a.greater_than(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(false)),
+            a.greater_than(&b).unwrap()
+        )
     }
 
     #[test]
     fn greater_int_float() {
         let a = Object::Primitive(Primitive::Integer(1));
         let b = Object::Primitive(Primitive::Float(1.0));
-        assert_eq!(Object::Primitive(Primitive::Boolean(false)), a.greater_than(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(false)),
+            a.greater_than(&b).unwrap()
+        )
     }
 
     #[test]
     fn greater_float_int() {
         let a = Object::Primitive(Primitive::Float(1.0));
         let b = Object::Primitive(Primitive::Integer(1));
-        assert_eq!(Object::Primitive(Primitive::Boolean(false)), a.greater_than(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(false)),
+            a.greater_than(&b).unwrap()
+        )
     }
 
     #[test]
     fn greater_eq_int() {
         let a = Object::Primitive(Primitive::Integer(1));
         let b = Object::Primitive(Primitive::Integer(1));
-        assert_eq!(Object::Primitive(Primitive::Boolean(true)), a.greater_than_equal(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(true)),
+            a.greater_than_equal(&b).unwrap()
+        )
     }
 
     #[test]
     fn greater_eq_float() {
         let a = Object::Primitive(Primitive::Float(1.2));
         let b = Object::Primitive(Primitive::Float(1.2));
-        assert_eq!(Object::Primitive(Primitive::Boolean(true)), a.greater_than_equal(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(true)),
+            a.greater_than_equal(&b).unwrap()
+        )
     }
 
     #[test]
     fn greater_eq_int_float() {
         let a = Object::Primitive(Primitive::Integer(1));
         let b = Object::Primitive(Primitive::Float(1.0));
-        assert_eq!(Object::Primitive(Primitive::Boolean(true)), a.greater_than_equal(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(true)),
+            a.greater_than_equal(&b).unwrap()
+        )
     }
 
     #[test]
     fn greater_eq_float_int() {
         let a = Object::Primitive(Primitive::Float(1.0));
         let b = Object::Primitive(Primitive::Integer(1));
-        assert_eq!(Object::Primitive(Primitive::Boolean(true)), a.greater_than_equal(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(true)),
+            a.greater_than_equal(&b).unwrap()
+        )
     }
 
     #[test]
@@ -437,126 +524,177 @@ mod tests {
     fn sub_int() {
         let a = Object::Primitive(Primitive::Integer(1));
         let b = Object::Primitive(Primitive::Integer(1));
-        assert_eq!(Object::Primitive(Primitive::Integer(0)), a.subtract(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Integer(0)),
+            a.subtract(&b).unwrap()
+        )
     }
 
     #[test]
     fn sub_float() {
         let a = Object::Primitive(Primitive::Float(1.0));
         let b = Object::Primitive(Primitive::Float(1.0));
-        assert_eq!(Object::Primitive(Primitive::Float(0.0)), a.subtract(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Float(0.0)),
+            a.subtract(&b).unwrap()
+        )
     }
 
     #[test]
     fn sub_int_float() {
         let a = Object::Primitive(Primitive::Integer(1));
         let b = Object::Primitive(Primitive::Float(1.0));
-        assert_eq!(Object::Primitive(Primitive::Float(0.0)), a.subtract(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Float(0.0)),
+            a.subtract(&b).unwrap()
+        )
     }
 
     #[test]
     fn sub_float_int() {
         let a = Object::Primitive(Primitive::Float(1.0));
         let b = Object::Primitive(Primitive::Integer(1));
-        assert_eq!(Object::Primitive(Primitive::Float(0.0)), a.subtract(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Float(0.0)),
+            a.subtract(&b).unwrap()
+        )
     }
 
     #[test]
     fn mul_int() {
         let a = Object::Primitive(Primitive::Integer(1));
         let b = Object::Primitive(Primitive::Integer(1));
-        assert_eq!(Object::Primitive(Primitive::Integer(1)), a.multiply(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Integer(1)),
+            a.multiply(&b).unwrap()
+        )
     }
 
     #[test]
     fn mul_float() {
         let a = Object::Primitive(Primitive::Float(1.0));
         let b = Object::Primitive(Primitive::Float(1.0));
-        assert_eq!(Object::Primitive(Primitive::Float(1.0)), a.multiply(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Float(1.0)),
+            a.multiply(&b).unwrap()
+        )
     }
 
     #[test]
     fn mul_int_float() {
         let a = Object::Primitive(Primitive::Integer(1));
         let b = Object::Primitive(Primitive::Float(1.0));
-        assert_eq!(Object::Primitive(Primitive::Float(1.0)), a.multiply(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Float(1.0)),
+            a.multiply(&b).unwrap()
+        )
     }
 
     #[test]
     fn mul_float_int() {
         let a = Object::Primitive(Primitive::Float(1.0));
         let b = Object::Primitive(Primitive::Integer(1));
-        assert_eq!(Object::Primitive(Primitive::Float(1.0)), a.multiply(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Float(1.0)),
+            a.multiply(&b).unwrap()
+        )
     }
 
     #[test]
     fn div_real_int() {
         let a = Object::Primitive(Primitive::Integer(1));
         let b = Object::Primitive(Primitive::Integer(1));
-        assert_eq!(Object::Primitive(Primitive::Float(1.0)), a.real_divide(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Float(1.0)),
+            a.real_divide(&b).unwrap()
+        )
     }
 
     #[test]
     fn div_real_float() {
         let a = Object::Primitive(Primitive::Float(1.0));
         let b = Object::Primitive(Primitive::Float(1.0));
-        assert_eq!(Object::Primitive(Primitive::Float(1.0)), a.real_divide(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Float(1.0)),
+            a.real_divide(&b).unwrap()
+        )
     }
 
     #[test]
     fn div_real_int_float() {
         let a = Object::Primitive(Primitive::Integer(1));
         let b = Object::Primitive(Primitive::Float(1.0));
-        assert_eq!(Object::Primitive(Primitive::Float(1.0)), a.real_divide(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Float(1.0)),
+            a.real_divide(&b).unwrap()
+        )
     }
 
     #[test]
     fn div_real_float_int() {
         let a = Object::Primitive(Primitive::Float(1.0));
         let b = Object::Primitive(Primitive::Integer(1));
-        assert_eq!(Object::Primitive(Primitive::Float(1.0)), a.real_divide(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Float(1.0)),
+            a.real_divide(&b).unwrap()
+        )
     }
 
     #[test]
     fn div_int_int() {
         let a = Object::Primitive(Primitive::Integer(10));
         let b = Object::Primitive(Primitive::Integer(2));
-        assert_eq!(Object::Primitive(Primitive::Integer(5)), a.int_divide(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Integer(5)),
+            a.int_divide(&b).unwrap()
+        )
     }
-
 
     #[test]
     fn is() {
         let a = Object::Primitive(Primitive::Integer(10));
         let b = Object::Primitive(Primitive::Integer(2));
-        assert_eq!(Object::Primitive(Primitive::Boolean(true)), a.is(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(true)),
+            a.is(&b).unwrap()
+        )
     }
 
     #[test]
     fn is_false_result() {
         let a = Object::Primitive(Primitive::Integer(10));
         let b = Object::Primitive(Primitive::Float(2.0));
-        assert_eq!(Object::Primitive(Primitive::Boolean(false)), a.is(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Boolean(false)),
+            a.is(&b).unwrap()
+        )
     }
-
 
     #[test]
     fn unary_minus() {
         let a = Object::Primitive(Primitive::Integer(10));
-        assert_eq!(Object::Primitive(Primitive::Integer(-10)), a.unary_minus().unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Integer(-10)),
+            a.unary_minus().unwrap()
+        )
     }
-
 
     #[test]
     fn unary_plus() {
         let a = Object::Primitive(Primitive::Integer(-10));
-        assert_eq!(Object::Primitive(Primitive::Integer(10)), a.unary_plus().unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Integer(10)),
+            a.unary_plus().unwrap()
+        )
     }
 
     #[test]
     fn module() {
         let a = Object::Primitive(Primitive::Integer(10));
         let b = Object::Primitive(Primitive::Integer(2));
-        assert_eq!(Object::Primitive(Primitive::Integer(0)), a.module(&b).unwrap())
+        assert_eq!(
+            Object::Primitive(Primitive::Integer(0)),
+            a.module(&b).unwrap()
+        )
     }
 }
